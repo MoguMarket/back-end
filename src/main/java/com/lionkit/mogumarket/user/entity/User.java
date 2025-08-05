@@ -1,10 +1,14 @@
 package com.lionkit.mogumarket.user.entity;
 
 
+import com.lionkit.mogumarket.cart.entity.Cart;
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
+import com.lionkit.mogumarket.purchase.entity.Purchase;
+import com.lionkit.mogumarket.review.entity.Review;
 import com.lionkit.mogumarket.security.jwt.enums.Role;
 import com.lionkit.mogumarket.security.jwt.entity.RefreshToken;
 import com.lionkit.mogumarket.security.oauth2.enums.ProviderType;
+import com.lionkit.mogumarket.store.entity.Store;
 import com.lionkit.mogumarket.user.dto.request.UserUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -71,19 +75,30 @@ public class User extends BaseEntity {
     // 닉네임. 사용자명
     private String nickname;
     private String email;
+    private String address;
+    private String phone;
+
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Store store;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Purchase> purchases = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Cart> carts = new ArrayList<>();
 
 
     public void updateRole(Role role){
         this.role = role;
     }
 
+    // TODO : update 메서드 정의
     public void update(UserUpdateRequestDto dto) {
-        if (dto.getNickname() != null && !dto.getNickname().isBlank()) {
-            this.nickname = dto.getNickname();
-        }
-        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-            this.email = dto.getEmail();
-        }
+
     }
 
 
