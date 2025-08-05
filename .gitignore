@@ -37,6 +37,7 @@ out/
 .vscode/
 
 # 설정 파일
+.yml
 
 data
 .env
