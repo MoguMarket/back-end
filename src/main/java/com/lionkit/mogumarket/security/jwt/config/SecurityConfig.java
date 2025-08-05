@@ -11,7 +11,6 @@ import com.lionkit.mogumarket.security.oauth2.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -49,7 +48,14 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/login", "/api/user/sign-up").permitAll()         // 로그인, 회원가입
+                                "/api/auth/login",
+                                "/api/user/sign-up",// 로그인, 회원가입
+                                "admin/sync-products",// 관리자용 API: 수동으로 상품 데이터를 Elasticsearch에 동기화
+                                "/api/search", // 검색
+                                "/api/search/trending",// 인기 검색어
+                                "/api/fcm/",// FCM 관련 API
+                                "/api/fcm/send")
+                        .permitAll()
                         .anyRequest().permitAll()
                 )
 

@@ -18,13 +18,9 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("OAuth2 + 자체 로그인 인증 API 문서")
+                .title("mogu-market API")
                 .description("""
-                        OAuth2(Kakao, Google, Naver) 로그인과 자체 로그인 기능을 통합한 인증 시스템입니다.
-                        
-                        - Access Token / Refresh Token 기반 인증
-                        - 기본 회원가입과 최종 회원가입의 2단계 처리
-                        - 토큰 발급과 갱신
+                        Mogu-Market API 문서입니다.
                         """)
                 .version("v1.0.0");
 
