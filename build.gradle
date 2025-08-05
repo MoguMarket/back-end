@@ -55,6 +55,17 @@ dependencies {
 	implementation 'io.swagger.core.v3:swagger-annotations:2.2.34'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 
+	// Elasticsearch
+	implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.5' // 또는 8.4.2
+	implementation 'co.elastic.clients:elasticsearch-java:8.12.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	// Dotenv for environment variables
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+	// Firebase Admin SDK
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
 
 }
 
