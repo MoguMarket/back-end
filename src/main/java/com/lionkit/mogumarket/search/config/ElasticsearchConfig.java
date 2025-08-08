@@ -1,0 +1,20 @@
+package com.lionkit.mogumarket.search.config;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ElasticsearchConfig {
+
+    @Bean(name = "customElasticsearchClient")
+    public RestHighLevelClient elasticsearchClient() {
+        return new RestHighLevelClient(
+                RestClient.builder(
+                        new HttpHost("localhost", 9200, "http") // 🔁 필요 시 변경
+                )
+        );
+    }
+}
