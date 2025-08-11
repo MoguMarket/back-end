@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +17,8 @@ import java.util.UUID;
 public class ProductSyncScheduler {
 
     private final ProductRepository productRepository;
+
+    @Nullable
     private final ProductSearchRepository productSearchRepository;
 
     @Scheduled(cron = "0 0 * * * *") // 매시간 실행

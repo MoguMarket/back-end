@@ -10,6 +10,7 @@ import com.lionkit.mogumarket.search.service.RedisSearchRankService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 @Service
@@ -17,6 +18,8 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
+
+    @Nullable
     private final ProductSearchRepository productSearchRepository;
     private final RedisSearchRankService redisSearchRankService;
 

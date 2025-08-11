@@ -7,10 +7,16 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.xcontent.XContentType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@ConditionalOnProperty(
+        name = "index.creator.enabled",
+        havingValue = "true",            // true일 때만 빈 등록
+        matchIfMissing = true            // 설정 없으면 true로 간주 (디폴트 true -> 기본적으론 elasticsearch 실행됨)
+)
 @Component
 @RequiredArgsConstructor
 public class IndexCreator {
