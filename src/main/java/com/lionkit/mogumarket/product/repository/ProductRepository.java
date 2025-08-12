@@ -11,6 +11,9 @@ import org.springframework.data.jpa.repository.QueryHints;
 
 import java.util.Optional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
@@ -28,4 +31,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "0"))
     Optional<Product> findForUpdateNoWait(@Param("id") Long id);
 
+    List<Product>findByModifiedAtAfter(LocalDateTime lastSyncTime);
 }
