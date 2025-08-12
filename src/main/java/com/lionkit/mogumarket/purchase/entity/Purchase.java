@@ -22,11 +22,6 @@ public class Purchase extends BaseEntity {
     @Column(name = "purchase_id")
     private Long id;
 
-    private Integer quantity;
-
-    @Enumerated(EnumType.STRING)
-    private PurchaseStatus status;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -34,4 +29,23 @@ public class Purchase extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+
+    /** 사용자가 예약한 기준단위 수량 (g/ml/ea) */
+    private Double orderedBaseQty;
+
+    /** 구매 상태  */
+    @Enumerated(EnumType.STRING)
+    private PurchaseStatus status;
+
+
+    /** 스냅샷: 예약 당시 공구 단계, 할인, 단가.
+     * stage 의 수정에 따른 데이터 불일치 방지 차원에서,
+     * 단순히 stage 를 저장하지 않고 해당 stage 의 세부적인 값 자체를 저장
+     */
+    private int levelSnapshot;           // 예: 1,2,3...
+    private double discountPercentSnapshot; // 예: 15
+    private double unitPriceSnapshot;        // 기준단위당 적용 단가
+
+
 }
