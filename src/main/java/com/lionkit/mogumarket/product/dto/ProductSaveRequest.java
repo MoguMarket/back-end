@@ -1,7 +1,6 @@
 package com.lionkit.mogumarket.product.dto;
 
 import com.lionkit.mogumarket.category.enums.CategoryType;
-import com.lionkit.mogumarket.product.enums.GroupPurchaseStatus;
 import com.lionkit.mogumarket.store.entity.Store;
 import lombok.*;
 

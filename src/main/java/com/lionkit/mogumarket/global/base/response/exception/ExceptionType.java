@@ -35,11 +35,15 @@ public enum ExceptionType {
 
 
     //store
-    STORE_NOT_FOUND(NOT_FOUND, "S001", "존재하지 않는 가게")
+    STORE_NOT_FOUND(NOT_FOUND, "S001", "존재하지 않는 가게"),
 
-    ;
-
-
+    // product
+    PRODUCT_NOT_FOUND(NOT_FOUND, "P001", "존재하지 않는 상품"),
+    STOCK_OVERFLOW(NOT_ACCEPTABLE, "P002", "해당 상품의 재고 초과"),
+    INVALID_QTY(NOT_ACCEPTABLE,"P003","구매량은 양수여야 합니다"),
+    PRODUCT_LOCK_TIMEOUT(LOCKED,"P004","구매에 대한 비관적 락 대기 초과, 재시도 바람."),
+    PRODUCT_LOCK_CONFLICT(CONFLICT,"P005","구매에 대한 비관적 락 관련 오류"),
+    STAGE_NOT_DEFINED(BAD_REQUEST,"P006","상품의 단계가 설정되지 않음");
     private final HttpStatus status;
     private final String code;
     private final String message;}
