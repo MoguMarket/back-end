@@ -1,7 +1,7 @@
-package com.lionkit.mogumarket.purchase.entity;
+package com.lionkit.mogumarket.order.entity;
 
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
-import com.lionkit.mogumarket.purchase.enums.PurchaseStatus;
+import com.lionkit.mogumarket.order.enums.OrderStatus;
 import com.lionkit.mogumarket.product.entity.Product;
 import com.lionkit.mogumarket.user.entity.User;
 import jakarta.persistence.*;
@@ -11,32 +11,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 
+
+/**
+ * 주의: OrderLine은 개념적으로 orders–product의 "중간테이블" 역할을 합니다.
+ * 다만 주문 시점의 수량/단가/할인/단계 등의 스냅샷을 보존해야 하므로
+ * 이름을 OrderProduct가 아니라 OrderLine으로 명명했습니다.
+ */
 @Entity
+@Table(name = "order_line")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Purchase extends BaseEntity {
+public class OrderLine extends BaseEntity {
 
-    @Id @GeneratedValue
-    @Column(name = "purchase_id")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_line_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "orders_id", nullable = false)
+    private Orders orders;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
 
-    /** 사용자가 예약한 기준단위 수량 (g/ml/ea) */
+    /** 사용자가 예약한 UNIT 단위 수량  */
     private Double orderedBaseQty;
-
-    /** 구매 상태  */
-    @Enumerated(EnumType.STRING)
-    private PurchaseStatus status;
 
 
     /** 스냅샷: 예약 당시 공구 단계, 할인, 단가.

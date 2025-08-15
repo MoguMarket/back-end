@@ -9,34 +9,25 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(
-        name = "cart",
-        uniqueConstraints = @UniqueConstraint(name = "uk_cart_user_product", columnNames = {"user_id", "product_id"}),
-        indexes = {
-                @Index(name = "idx_cart_user", columnList = "user_id"),
-                @Index(name = "idx_cart_product", columnList = "product_id")
-        }
-)
-public class Cart extends BaseEntity {
+public class Cart extends BaseEntity  {
 
     @Id @GeneratedValue
     @Column(name = "cart_id")
     private Long id;
 
-    @Column(nullable = false)
-    private Integer quantity; // 1 이상
+    private Integer quantity;
 
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "product_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private Product product;
-
-    public void changeQuantity(int q) { this.quantity = q; }
-    public void increase(int delta) { this.quantity += delta; }
 }

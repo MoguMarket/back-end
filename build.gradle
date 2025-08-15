@@ -67,6 +67,9 @@ dependencies {
 	// Firebase Admin SDK
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
 
+	// portone
+	implementation group: 'io.portone', name: 'server-sdk', version: '0.19.2'
+
 }
 
 tasks.named('test') {

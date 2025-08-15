@@ -1,10 +1,8 @@
 package com.lionkit.mogumarket.product.entity;
-import com.lionkit.mogumarket.cart.entity.Cart;
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
 import com.lionkit.mogumarket.global.base.response.exception.BusinessException;
 import com.lionkit.mogumarket.global.base.response.exception.ExceptionType;
 import com.lionkit.mogumarket.product.enums.Unit;
-import com.lionkit.mogumarket.purchase.entity.Purchase;
 import com.lionkit.mogumarket.review.entity.Review;
 import com.lionkit.mogumarket.store.entity.Store;
 import jakarta.persistence.*;
@@ -24,7 +22,7 @@ import java.util.List;
 @Builder
 public class Product extends BaseEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     private Long id;
 
@@ -74,15 +72,8 @@ public class Product extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Purchase> purchases  = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cart> carts = new ArrayList<>();
 
 
     /** 낙관적 락(기본 방어막) */

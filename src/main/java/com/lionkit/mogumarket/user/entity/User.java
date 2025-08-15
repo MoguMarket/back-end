@@ -3,7 +3,7 @@ package com.lionkit.mogumarket.user.entity;
 
 import com.lionkit.mogumarket.cart.entity.Cart;
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
-import com.lionkit.mogumarket.purchase.entity.Purchase;
+import com.lionkit.mogumarket.order.entity.Orders;
 import com.lionkit.mogumarket.review.entity.Review;
 import com.lionkit.mogumarket.security.jwt.enums.Role;
 import com.lionkit.mogumarket.security.jwt.entity.RefreshToken;
@@ -83,7 +83,7 @@ public class User extends BaseEntity {
     private Store store;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Purchase> purchases = new ArrayList<>();
+    private List<Orders> orders = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();

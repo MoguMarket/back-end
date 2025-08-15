@@ -1,11 +1,11 @@
-package com.lionkit.mogumarket.purchase.enums;
+package com.lionkit.mogumarket.order.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum PurchaseStatus {
+public enum OrderStatus {
 
     /**
      * 공구 참여 완료 = 예약 = 결제 확정 (환불 불가 ->가격/단계 스냅샷 고정)
