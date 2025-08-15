@@ -18,10 +18,10 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 @EnableScheduling
 @SpringBootApplication
-public class OAuthTestApplication {
+public class MoguMarketApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OAuthTestApplication.class, args);
+		SpringApplication.run(MoguMarketApplication.class, args);
 	}
 
 }
