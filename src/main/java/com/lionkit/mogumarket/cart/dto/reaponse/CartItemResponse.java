@@ -3,7 +3,7 @@ package com.lionkit.mogumarket.cart.dto.reaponse;
 public record CartItemResponse(
         Long productId,
         String productName,
-        Integer unitPrice,
+        long unitPrice,
         Integer quantity,
-        Integer lineTotal // = unitPrice * quantity
+        long lineTotal // = unitPrice * quantity
 ) {}

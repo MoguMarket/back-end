@@ -40,10 +40,10 @@ public class ProductStageService {
 
     /** 현재 단계 기준 단가 계산 (정가 * (1 - 할인율%)) */
     @Transactional(readOnly = true)
-    public double getAppliedUnitPrice(Product product) {
+    public long getAppliedUnitPrice(Product product) {
         ProductStage cur = getCurrentStage(product);
         double discountPercent = (cur == null) ? 0.0 : cur.getDiscountPercent(); // double 기반
         double rate = (100.0 - discountPercent) / 100.0;
-        return product.getOriginalPricePerBaseUnit() * rate;
+        return Math.round(product.getOriginalPricePerBaseUnit() * rate);
     }
 }
