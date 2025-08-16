@@ -1,6 +1,8 @@
 package com.lionkit.mogumarket.market.controller;
 
 import com.lionkit.mogumarket.market.service.MarketService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/market")
+@Tag(name = "시장 API", description = "시장 관련 API")
 public class MarketController {
 
     private final MarketService marketService;
@@ -28,6 +31,11 @@ public class MarketController {
      * @return 상품 목록과 페이징 정보
      */
     @GetMapping
+    @Operation(
+            summary = "시장 목록 조회",
+            description = "시장을 페이징 처리하여 조회합니다. \n" +
+                    "시도(sido)와 시군구(sigungu)로 필터링할 수 있습니다."
+    )
     public ResponseEntity<Map<String, Object>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int perPage,
