@@ -57,7 +57,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(
                                 "/api/carts/**",
-                                "/api/user/complete-sign-up")
+                                "/api/user/complete-sign-up",
+                                "/api/markets")
                         .authenticated() // ← 장바구니는 인증 필요
                         .anyRequest().permitAll()
                 )
