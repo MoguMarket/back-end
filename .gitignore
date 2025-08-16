@@ -37,9 +37,10 @@ out/
 .vscode/
 
 # 설정 파일
+.yml
 
 data
 .env
 
-# End of https://www.toptal.com/developers/gitignore/api/java,gradle,intellij,intellij+all,intellij+iml
 .DS_Store
+src/main/resources/application.yml
