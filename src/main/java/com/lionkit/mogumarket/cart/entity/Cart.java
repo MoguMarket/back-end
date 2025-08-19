@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -17,17 +20,17 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Cart extends BaseEntity  {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_id")
     private Long id;
 
-    private Integer quantity;
 
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
@@ -41,4 +44,11 @@ public class Cart extends BaseEntity  {
         if (quantity < 1) throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
         this.quantity = quantity;
     }
+
+    @Builder.Default
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartLine> lines = new ArrayList<>();
+
+
+
 }

@@ -42,13 +42,12 @@ public class OrderLine extends BaseEntity {
     private Double orderedBaseQty;
 
 
-    /** 스냅샷: 예약 당시 공구 단계, 할인, 단가.
-     * stage 의 수정에 따른 데이터 불일치 방지 차원에서,
-     * 단순히 stage 를 저장하지 않고 해당 stage 의 세부적인 값 자체를 저장
-     */
-    private int levelSnapshot;           // 예: 1,2,3...
-    private double discountPercentSnapshot; // 예: 15
-    private double unitPriceSnapshot;        // 기준단위당 적용 단가
 
+    /**
+     * 공구 종료 시점 공구 단계, 할인, 단가 스냅샷
+     */
+    private int finalLevelSnapshot;           // 예: 1,2,3...
+    private double finalDiscountPercentSnapshot; // 예: 15
+    private double finalUnitPriceSnapshot;        // 기준단위당 적용 단가
 
 }

@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
