@@ -1,0 +1,12 @@
+{
+  "properties": {
+    "name": {
+      "type": "text",
+      "analyzer": "nori_analyzer"
+    },
+    "description": {
+      "type": "text",
+      "analyzer": "nori_analyzer"
+    }
+  }
+}
