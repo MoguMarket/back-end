@@ -1,6 +1,8 @@
 package com.lionkit.mogumarket.product.controller;
 
 import com.lionkit.mogumarket.product.dto.ProductSaveRequest;
+import com.lionkit.mogumarket.product.dto.request.ProductPatchRequest;
+import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
 import com.lionkit.mogumarket.product.dto.response.ProductResponse;
 import com.lionkit.mogumarket.product.enums.SortType;
 import com.lionkit.mogumarket.product.service.FilterService;
@@ -25,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
-    private final FilterService filterService;
+
 
     // CREATE
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
