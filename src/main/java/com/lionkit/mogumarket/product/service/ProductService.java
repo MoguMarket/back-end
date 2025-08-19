@@ -1,6 +1,7 @@
 package com.lionkit.mogumarket.product.service;
 
 import com.lionkit.mogumarket.product.dto.ProductSaveRequest;
+import com.lionkit.mogumarket.product.entity.Product;
 import com.lionkit.mogumarket.product.repository.ProductRepository;
 import com.lionkit.mogumarket.search.document.ProductDocument;
 import com.lionkit.mogumarket.search.repository.ProductSearchRepository;

@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Tag(name = "인증 API", description = "Access Token / Refresh Token 기반 인증 관련 API")
 @RestController
 @RequiredArgsConstructor
@@ -91,5 +93,18 @@ public class AuthController {
     ) {
         authService.logoutAll(principal.getUser().getId());
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse());
+    }
+
+    @GetMapping("/me")
+    public Map<String, Object> me(@AuthenticationPrincipal PrincipalDetails principal) {
+        Map<String, Object> res = new java.util.HashMap<>();
+        res.put("principalNull", principal == null);
+        if (principal != null) {
+            res.put("userId", principal.getUser().getId());
+            res.put("role", principal.getUser().getRole());
+            res.put("username", principal.getUser().getUsername());
+            res.put("nickname", principal.getUser().getNickname());
+        }
+        return res;
     }
 }

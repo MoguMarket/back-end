@@ -31,8 +31,6 @@ public class SecurityConfig {
     private final OAuth2FailureHandler oAuth2FailureHandler;
 
 
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -54,8 +52,14 @@ public class SecurityConfig {
                                 "/api/search", // 검색
                                 "/api/search/trending",// 인기 검색어
                                 "/api/fcm/",// FCM 관련 API
-                                "/api/fcm/send")
+                                "/api/fcm/send",
+                                "/api/auth/me")
                         .permitAll()
+                        .requestMatchers(
+                                "/api/carts/**",
+                                "/api/user/complete-sign-up",
+                                "/api/markets")
+                        .authenticated() // ← 장바구니는 인증 필요
                         .anyRequest().permitAll()
                 )
 
