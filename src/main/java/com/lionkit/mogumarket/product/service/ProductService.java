@@ -12,8 +12,8 @@ import com.lionkit.mogumarket.store.repsitory.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +54,7 @@ public class ProductService {
 
         // 검색 키워드 랭킹 반영
         redisSearchRankService.increaseKeywordScore(saved.getName());
+
 
         return saved.getId();
     }
