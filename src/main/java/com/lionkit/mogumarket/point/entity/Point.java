@@ -1,6 +1,6 @@
 package com.lionkit.mogumarket.point.entity;
 
-import com.lionkit.mogumarket.user.entity.User;
+import com.test.oauth.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

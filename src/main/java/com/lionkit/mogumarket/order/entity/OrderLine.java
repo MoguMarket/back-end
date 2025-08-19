@@ -1,15 +1,13 @@
 package com.lionkit.mogumarket.order.entity;
 
-import com.lionkit.mogumarket.global.base.domain.BaseEntity;
-import com.lionkit.mogumarket.order.enums.OrderStatus;
 import com.lionkit.mogumarket.product.entity.Product;
-import com.lionkit.mogumarket.user.entity.User;
+import com.test.oauth.global.base.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import org.hibernate.query.Order;
 
 
 /**
@@ -31,7 +29,7 @@ public class OrderLine extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "orders_id", nullable = false)
-    private Orders orders;
+    private Order orders;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)

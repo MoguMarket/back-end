@@ -23,7 +23,7 @@ public class MarketService {
 
     private final WebClient odcloud;
 
-    @Value("${odcloud.service.key:${ODCLOUD_SERVICE_KEY:}}")
+    @Value("${odcloud.service.key}")
     private String serviceKeyRaw;
 
     private String serviceKey;
@@ -37,7 +37,7 @@ public class MarketService {
         log.info("[ODCLOUD] env ODCLOUD_SERVICE_KEY present? {}", (env != null && !env.isBlank()));
     }
 
-    public Mono<Map<String, Object>> fetch(int page, int perPage) {
+    public Mono< Map<String, Object>> fetch(int page, int perPage) {
         return fetch(page, perPage, null, null, null);
     }
 

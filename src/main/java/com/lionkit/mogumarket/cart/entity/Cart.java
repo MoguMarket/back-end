@@ -1,8 +1,8 @@
 package com.lionkit.mogumarket.cart.entity;
 
-import com.lionkit.mogumarket.global.base.domain.BaseEntity;
 import com.lionkit.mogumarket.product.entity.Product;
-import com.lionkit.mogumarket.user.entity.User;
+import com.test.oauth.global.base.domain.BaseEntity;
+import com.test.oauth.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cart extends BaseEntity  {
+public class Cart extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_id")
@@ -36,18 +36,11 @@ public class Cart extends BaseEntity  {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    public void increase(int amount) {
-        this.quantity += amount;
-    }
 
     public void changeQuantity(int quantity) {
         if (quantity < 1) throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
-        this.quantity = quantity;
     }
 
-    @Builder.Default
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartLine> lines = new ArrayList<>();
 
 
 
