@@ -1,29 +1,31 @@
-package com.lionkit.mogumarket.product.service;
-
-import com.lionkit.mogumarket.product.dto.ProductSaveRequest;
-import com.lionkit.mogumarket.product.repository.ProductRepository;
-import com.lionkit.mogumarket.search.document.ProductDocument;
-import com.lionkit.mogumarket.search.repository.ProductSearchRepository;
-import com.lionkit.mogumarket.search.service.RedisSearchRankService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Nullable;
-
-@Service
-@RequiredArgsConstructor
-public class ProductService {
-
-    private final ProductRepository productRepository;
-
-    @Nullable
-    private final ProductSearchRepository productSearchRepository;
-    private final RedisSearchRankService redisSearchRankService;
-
-    public void saveProduct(ProductSaveRequest request) {
+//package com.lionkit.mogumarket.product.service;
+//
+//import com.lionkit.mogumarket.product.dto.ProductSaveRequest;
+//import com.lionkit.mogumarket.product.entity.Product;
+//import com.lionkit.mogumarket.product.repository.ProductRepository;
+//import com.lionkit.mogumarket.search.document.ProductDocument;
+//import com.lionkit.mogumarket.search.repository.ProductDocumentRepository;
+//import com.lionkit.mogumarket.search.service.RedisSearchRankService;
+//import lombok.RequiredArgsConstructor;
+//import org.springframework.stereotype.Service;
+//
+//import javax.annotation.Nullable;
+//
+//@Service
+//@RequiredArgsConstructor
+//public class ProductService {
+//
+//    private final ProductRepository productRepository;
+//
+//    @Nullable
+//    private final ProductDocumentRepository productSearchRepository;
+//    private final RedisSearchRankService redisSearchRankService;
+//
+//    public void saveProduct(ProductSaveRequest request) {
 //        Product product = Product.builder()
 //                .name(request.getName())
 //                .description(request.getDescription())
+//                .unit()
 //                .originalPricePerBaseUnit(request.getOriginalPrice())
 //                .discountPricePerBaseUnit(request.getDiscountPrice())
 //                .stock(request.getStock())
@@ -46,6 +48,6 @@ public class ProductService {
 //        productSearchRepository.save(doc);
 //
 //        redisSearchRankService.increaseKeywordScore(product.getName());
-    }
-}
-
+//    }
+//}
+//

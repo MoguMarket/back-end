@@ -16,6 +16,8 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
+    List<Product> findByModifiedAtGreaterThan(LocalDateTime from);
+
 
     /** 공동 구매 참여 == 구매 확정 (환불 불가) ->  Product 행 선점(비관적 락)
      * 비관적 락 + 5초 타임아웃 (데드락 방지 차원: 비관적 락만 적용시 무한대기타게됨 )
