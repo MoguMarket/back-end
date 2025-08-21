@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -17,11 +20,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Cart extends BaseEntity  {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_id")
     private Long id;
 
-    private Integer quantity;
 
 
 
@@ -42,3 +44,4 @@ public class Cart extends BaseEntity  {
         this.quantity = quantity;
     }
 }
+
