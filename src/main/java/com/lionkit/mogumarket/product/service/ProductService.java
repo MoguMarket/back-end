@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
-
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -92,11 +91,13 @@ public class ProductService {
         );
     }
 
+
     // DELETE
     @Transactional
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
         productRepository.delete(product);
+
     }
 }

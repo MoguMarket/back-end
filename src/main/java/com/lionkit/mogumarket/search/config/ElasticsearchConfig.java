@@ -1,30 +1,35 @@
 package com.lionkit.mogumarket.search.config;
 
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.elasticsearch.client.ClientConfiguration;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 @Configuration
-public class ElasticsearchConfig {
+@EnableElasticsearchRepositories
+public class ElasticsearchConfig extends ElasticsearchConfiguration  {
 
-    @Value("${ELASTICSEARCH_HOST}")
-    private String esHost;
+    @Value("${spring.elasticsearch.username}")
+    private String username;
 
-    @Value("${ELASTICSEARCH_PORT}")
-    private int esPort;
+    @Value("${spring.elasticsearch.password}")
+    private String password;
 
-    @Value("${ELASTICSEARCH_SCHEME}")
-    private String esScheme;
+    @Value("${spring.elasticsearch.uris}")
+    private String[] esHost;
 
-    @Bean(name = "customElasticsearchClient")
-    public RestHighLevelClient elasticsearchClient() {
-        return new RestHighLevelClient(
-                RestClient.builder(
-                        new HttpHost(esHost, esPort, esScheme)
-                )
-        );
+
+
+
+
+    @Override
+    public ClientConfiguration clientConfiguration() {
+        return ClientConfiguration.builder()
+                .connectedTo(esHost)
+                .withBasicAuth(username, password)
+                .build();
+
     }
+
 }

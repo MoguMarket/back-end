@@ -8,12 +8,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    List<Product> findByModifiedAtGreaterThan(LocalDateTime from);
 
 
     /** 공동 구매 참여 == 구매 확정 (환불 불가) ->  Product 행 선점(비관적 락)
@@ -31,5 +32,3 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findForUpdateNoWait(@Param("id") Long id);
 
     List<Product> findByModifiedAtAfter(LocalDateTime lastSyncTime);
-
-}

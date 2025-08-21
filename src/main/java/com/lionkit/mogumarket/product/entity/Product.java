@@ -1,5 +1,4 @@
 package com.lionkit.mogumarket.product.entity;
-
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
 import com.lionkit.mogumarket.product.enums.Unit;
 import com.lionkit.mogumarket.review.entity.Review;
@@ -36,6 +35,7 @@ public class Product extends BaseEntity {
     private Unit unit;
 
     @Column(nullable = false)
+
     private double originalPricePerBaseUnit;
 
     @Column(nullable = false)
