@@ -9,7 +9,9 @@ public class DotenvPropertySourceConfig {
 
     @PostConstruct
     public void loadEnv() {
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()  // .env 파일 없으면 무시
+                .load();
         dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
     }
 }
