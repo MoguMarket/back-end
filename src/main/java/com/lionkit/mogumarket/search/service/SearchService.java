@@ -17,12 +17,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchService {
 
-    @Nullable
     private final ElasticsearchOperations elasticsearchOperations;
     private final RedisSearchRankService redisSearchRankService;
 
     public List<ProductDocument> search(String keyword) {
-        redisSearchRankService.increaseKeywordScore(keyword);
 
         Criteria criteria = new Criteria("name").matches(keyword)
                 .or(new Criteria("description").matches(keyword));
@@ -31,6 +29,9 @@ public class SearchService {
 
         SearchHits<ProductDocument> hits =
                 elasticsearchOperations.search(query, ProductDocument.class);
+
+        if (!hits.isEmpty()) redisSearchRankService.increaseKeywordScore(keyword); // 검색 성공 후 up
+
 
         return hits.stream().map(SearchHit::getContent).toList();
     }

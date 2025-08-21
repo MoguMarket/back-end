@@ -1,8 +1,8 @@
 package com.lionkit.mogumarket.product.service;
 
-
-import com.lionkit.mogumarket.product.dto.ProductSaveRequest;
+import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.product.dto.request.ProductPatchRequest;
+import com.lionkit.mogumarket.product.dto.request.ProductSaveRequest;
 import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
 import com.lionkit.mogumarket.product.dto.response.ProductResponse;
 import com.lionkit.mogumarket.product.entity.Product;
@@ -10,11 +10,12 @@ import com.lionkit.mogumarket.product.repository.ProductRepository;
 import com.lionkit.mogumarket.store.entity.Store;
 import com.lionkit.mogumarket.store.repsitory.StoreRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.*;
-
+import org.springframework.transaction.annotation.Transactional; // ← 이걸로!
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class ProductService {
                 .stock(request.getStock())
                 .imageUrl(request.getImageUrl())
                 .store(store)
+                .category(CategoryType.valueOf(request.getCategory()))
                 .build();
 
         return productRepository.save(product).getId();
@@ -76,7 +78,9 @@ public class ProductService {
                 request.getStoreId() != null ?
                         storeRepository.findById(request.getStoreId())
                                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Store ID"))
-                        : null
+                        : null,
+                request.getCategory()
+
         );
     }
 

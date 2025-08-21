@@ -1,0 +1,28 @@
+[33mb8d84e7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m, [m[1;31morigin/dev[m[33m, [m[1;32mstore[m[33m)[m Refactor(market) - maeket api swagger
+[33mf750a6a[m feat(market) - maeket api call
+[33m05c577b[m[33m ([m[1;31morigin/cart[m[33m)[m chore(cart) - 장바구니,시장 관련 Dotenv 업데이트
+[33mb1eb63e[m chore(cart) - 장바구니,시장 관련 Dotenv 업데이트
+[33m92cde3f[m chore(cart) - 장바구니,시장 관련 security 업데이트
+[33m064a7ed[m feat(cart) - 장바구니 관련 기능 연결
+[33mc9822fc[m refactor(domain): streamline Order/Cart line model & align JPA with MySQL DDL
+[33m394c6b0[m refactor : Rename main application class to MoguMarketApplication
+[33m3b01bc4[m feat(product,purchase): change group-buying criteria from participant count to stock units (g/ml/ea) & add exception for undefined stage
+[33m643ad45[m chore(cart) - 장바구니 관련 security 업데이트
+[33mcac6bed[m feat(cart) - 장바구니 관련 기능 연결
+[33mc0476b1[m Refactor(product,search) - Elasticsearch modifiyAt 기준 업데이트
+[33m185bd12[m Refactor(product,search) -  product modifiyAt 기준 업데이트
+[33m5fde3b2[m feat: allow bypassing Elasticsearch for local development
+[33mea0deee[m chore: ignore local application.yml
+[33mdbb64ec[m feat(product) -  product 관련 기능 연결
+[33mdcef217[m feat(search) - Search 기능 연결
+[33m006f5ef[m feat(search) - Search 기능 연결
+[33m8333501[m chore(search) - Search docker,nori setting,mapping 설정 파일
+[33m4e875b6[m feat(search) - Search 기능 연결
+[33m38ca2a1[m chore(FCM,dotenv) - FCM,Dotenv관련 설정 변경
+[33m1a1e324[m feat(FCM): FCM-웹푸시 관련 기능 추가
+[33ma61164f[m chore(fcm): fcm관련 endpoint security 설정
+[33m1c5c4eb[m feat(FCM): FCM 웹푸시 관련 기능 연결
+[33ma36de9e[m[33m ([m[1;32mmain[m[33m)[m feat: define entities for market, product, purchase, and review domains
+[33m22baa41[m chore: rename base package to com.lionkit.mogumarket
+[33meeed161[m chore: remove default README file
+[33md28d5d7[m init

@@ -1,5 +1,7 @@
 package com.lionkit.mogumarket.search.controller;
 
+import com.lionkit.mogumarket.global.base.response.ResponseBody;
+import com.lionkit.mogumarket.global.base.response.ResponseUtil;
 import com.lionkit.mogumarket.search.document.ProductDocument;
 import com.lionkit.mogumarket.search.service.SearchService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,8 +29,8 @@ public class SearchController {
             description = "키워드를 기반으로 상품을 검색합니다. \n" +
                     "검색어는 상품명, 카테고리명, 브랜드명 등에서 일치하는 항목을 찾습니다."
     )
-    public ResponseEntity<List<ProductDocument>> search(@RequestParam String keyword) {
-        return ResponseEntity.ok(searchService.search(keyword));
+    public ResponseEntity<ResponseBody<List<ProductDocument>>> search(@RequestParam String keyword) {
+        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(searchService.search(keyword)));
     }
 
     @GetMapping("/trending")
@@ -37,7 +39,7 @@ public class SearchController {
             description = "최근에 많이 검색된 키워드를 반환합니다. \n" +
                     "최대 10개의 키워드를 반환하며, 인기 검색어는 시간에 따라 변동될 수 있습니다."
     )
-    public ResponseEntity<List<String>> trending() {
-        return ResponseEntity.ok(searchService.getTopTrendingKeywords());
+    public ResponseEntity<ResponseBody<List<String>>> trending() {
+        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(searchService.getTopTrendingKeywords()));
     }
 }
