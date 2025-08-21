@@ -27,8 +27,6 @@ public class Market extends BaseEntity {
 
     private String name;           // ex) 설악눈메골시장
 
-    private String type;           // ex) 전통시장 (문자열 필드로 저장)
-
     private String landAddress;    // ex) 경기도 가평군 설악면 신천리 4-13~14
 
     private String roadAddress;    // ex) 경기도 가평군 설악면 신천중앙로 104-1
