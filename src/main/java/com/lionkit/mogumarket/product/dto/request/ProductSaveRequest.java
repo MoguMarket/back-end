@@ -1,4 +1,4 @@
-package com.lionkit.mogumarket.product.dto;
+package com.lionkit.mogumarket.product.dto.request;
 
 import com.lionkit.mogumarket.product.enums.Unit;
 import lombok.Getter;
@@ -16,4 +16,5 @@ public class ProductSaveRequest {
     private LocalDateTime deadline;
     private String imageUrl;
     private Long storeId; // store 매핑용
+    private String category; // 카테고리 매핑용
 }

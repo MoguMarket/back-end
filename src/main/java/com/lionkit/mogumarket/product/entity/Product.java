@@ -1,4 +1,6 @@
 package com.lionkit.mogumarket.product.entity;
+
+import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
 import com.lionkit.mogumarket.product.enums.Unit;
 import com.lionkit.mogumarket.review.entity.Review;
@@ -34,8 +36,11 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Unit unit;
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true) // ← DB가 DEFAULT NULL이면 일단 true로 맞추는 게 안전
+    private CategoryType category;
 
+    @Column(nullable = false)
     private double originalPricePerBaseUnit;
 
     @Column(nullable = false)
@@ -52,7 +57,7 @@ public class Product extends BaseEntity {
     private List<Review> reviews = new ArrayList<>();
 
     public void update(String name, String description, Unit unit, Double originalPrice,
-                       Double stock, String imageUrl, Store store) {
+                       Double stock, String imageUrl, Store store , CategoryType category) {
         if (name != null) this.name = name;
         if (description != null) this.description = description;
         if (unit != null) this.unit = unit;
@@ -60,6 +65,8 @@ public class Product extends BaseEntity {
         if (stock != null) this.stock = stock;
         if (imageUrl != null) this.imageUrl = imageUrl;
         if (store != null) this.store = store;
+        if (category != null) this.category = category;
+
     }
 
     public void patch(Double originalPrice, String imageUrl) {
