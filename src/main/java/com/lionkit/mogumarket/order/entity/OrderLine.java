@@ -1,16 +1,12 @@
 package com.lionkit.mogumarket.order.entity;
 
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
-import com.lionkit.mogumarket.order.enums.OrderStatus;
 import com.lionkit.mogumarket.product.entity.Product;
-import com.lionkit.mogumarket.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-
 
 /**
  * 주의: OrderLine은 개념적으로 orders–product의 "중간테이블" 역할을 합니다.
@@ -25,7 +21,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderLine extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_line_id")
     private Long id;
 
@@ -37,25 +34,24 @@ public class OrderLine extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-
-    /** 사용자가 예약한 UNIT 단위 수량  */
+    /** 사용자가 예약한 UNIT 단위 수량 */
+    @Column(nullable = false)
     private Double orderedBaseQty;
 
-
-    /** 예약 당시 공구 단계, 할인, 단가 스냅샷
-     * stage 의 수정에 따른 데이터 불일치 방지 차원에서,
-     * 단순히 stage 를 저장하지 않고 해당 stage 의 세부적인 값 자체를 저장
+    /**
+     * 스냅샷: 예약 당시 공구 단계/할인/단가
+     * stage 변경에 따른 데이터 불일치 방지를 위해,
+     * 단순히 stage 참조 대신 당시의 값을 저장합니다.
      */
-    private int levelSnapshot;           // 예: 1,2,3...
-    private double discountPercentSnapshot; // 예: 15
-    private double unitPriceSnapshot;        // 기준단위당 적용 단가
-
+    private int levelSnapshot;                    // 예: 1, 2, 3 ...
+    private double discountPercentSnapshot;       // 예: 15
+    private double unitPriceSnapshot;             // 기준단위당 적용 단가
 
     /**
-     * 공구 종료 시점 공구 단계, 할인, 단가 스냅샷
+     * 스냅샷: 공구 종료 시점의 단계/할인/단가
+     * (종료 시점 정산 기준이 필요할 때 사용)
      */
-    private int finalLevelSnapshot;           // 예: 1,2,3...
-    private double finalDiscountPercentSnapshot; // 예: 15
+    private int finalLevelSnapshot;               // 예: 1, 2, 3 ...
+    private double finalDiscountPercentSnapshot;  // 예: 15
     private double finalUnitPriceSnapshot;        // 기준단위당 적용 단가
-
 }
