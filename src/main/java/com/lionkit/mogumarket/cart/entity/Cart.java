@@ -23,6 +23,8 @@ public class Cart extends BaseEntity  {
 
     private Integer quantity;
 
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -30,4 +32,13 @@ public class Cart extends BaseEntity  {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    public void increase(int amount) {
+        this.quantity += amount;
+    }
+
+    public void changeQuantity(int quantity) {
+        if (quantity < 1) throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
+        this.quantity = quantity;
+    }
 }
