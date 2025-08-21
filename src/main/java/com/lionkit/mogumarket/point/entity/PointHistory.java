@@ -38,6 +38,7 @@ public class PointHistory extends BaseEntity {
      * point 변화를 일으킨 관련 결제 이력의 정보.
      * 결제와 관련한 변화가 아니면 null 을 허용합니다.
      */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)  // 결제 관련이 아니면 null 허용
     @JoinColumn(name = "payment_history_id")
     private PaymentHistory paymentHistory;
 

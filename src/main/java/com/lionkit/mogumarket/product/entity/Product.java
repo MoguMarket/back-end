@@ -1,4 +1,5 @@
 package com.lionkit.mogumarket.product.entity;
+import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
 import com.lionkit.mogumarket.global.base.response.exception.BusinessException;
 import com.lionkit.mogumarket.global.base.response.exception.ExceptionType;
@@ -45,6 +46,9 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private double originalPricePerBaseUnit; // 원가
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CategoryType category;
 
     /**
      * 전부 '기준단위'(g/ml/ea) 기준
