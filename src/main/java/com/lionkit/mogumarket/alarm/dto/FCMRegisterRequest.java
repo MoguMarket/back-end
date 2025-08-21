@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class FCMRegisterRequest {
-    private Long userId;
     private String fcmToken;
 }

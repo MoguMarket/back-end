@@ -1,19 +1,20 @@
 package com.lionkit.mogumarket.alarm.repository;
 
 import com.lionkit.mogumarket.alarm.entity.Alarm;
-import com.lionkit.mogumarket.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FcmTokenRepository extends JpaRepository<Alarm, Long> {
 
-        Optional<Alarm> findByUser(User user);
+        Optional<Alarm> findByToken(String token);
 
-        boolean existsByUserId(Long userId);
+        List<Alarm> findAllByUserId(Long userId);
 
-        void deleteByUserId(Long userId); // optional
+        boolean existsByUserIdAndToken(Long userId, String token);
 
+        void deleteByUserId(Long userId);
 
+        void deleteByUserIdAndToken(Long userId, String token);
 }
-
