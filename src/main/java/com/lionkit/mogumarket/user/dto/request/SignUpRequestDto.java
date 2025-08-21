@@ -16,12 +16,17 @@ import lombok.*;
 public class SignUpRequestDto {
     private String username;
     private String password;
+    private String nickname;
+    private String email;
+
 
     public User toEntity() {
         return User.builder()
                 .username(username)
                 .password(password)
-                .role(Role.NOT_REGISTERED) // OAuth2 회원가입과 마찬가지로, 처음 기본 정보만으로는 완전한 회원가입 처리 시키진 않음
+                .nickname(nickname)
+                .email(email)
+                .role(Role.USER) // 별도의 추가 작업 없이 회원가입 시킴
                 .build();
     }
 }

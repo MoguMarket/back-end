@@ -9,7 +9,6 @@ import com.lionkit.mogumarket.security.jwt.enums.Role;
 import com.lionkit.mogumarket.security.jwt.entity.RefreshToken;
 import com.lionkit.mogumarket.security.oauth2.enums.ProviderType;
 import com.lionkit.mogumarket.store.entity.Store;
-import com.lionkit.mogumarket.user.dto.request.UserUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -96,10 +95,6 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    // TODO : update 메서드 정의
-    public void update(UserUpdateRequestDto dto) {
-
-    }
 
 
 }
