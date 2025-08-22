@@ -34,6 +34,26 @@ public enum ExceptionType {
 
 
 
+    //point
+    POINT_WALLET_NOT_FOUND(NOT_FOUND, "P001", "해당 사용자에 대한 point wallet 을 찾을 수 없습니다."),
+
+    /**
+     * 포인트 차감 "시도" 시점에 보유중인 포인트가 부족할 경우 발생하는 exception
+     */
+    POINT_INSUFFICIENT_AVAILABLE(NOT_ACCEPTABLE,"P002","보유중인 포인트보다 더 많은 포인트 차감 시도는 불가합니다."),
+
+    /**
+     * hold 된 포인트에 대한 작업을 시도하는 상황에서,
+     * hold 된 포인트량보다 더 큰 포인트량에 대해 작업을 시도할 경우 발생하는 exception
+     */
+    POINT_HOLD_INSUFFICIENT(INTERNAL_SERVER_ERROR,"P003","실제로 hold 된 포인트 보다 더 많은 hold 포인트에 대한 작업 시도 발생"),
+
+    /**
+     * "최종" 포인트 차감 시점에 보유중인 포인트가 부족할 경우 발생하는 exception
+     */
+    POINT_BALANCE_INSUFFICIENT(NOT_ACCEPTABLE,"P004","보유중인 포인트가 부족합니다."),
+
+
     //store
     STORE_NOT_FOUND(NOT_FOUND, "S001", "존재하지 않는 가게"),
 
@@ -44,6 +64,7 @@ public enum ExceptionType {
     PRODUCT_LOCK_TIMEOUT(LOCKED,"P004","구매에 대한 비관적 락 대기 초과, 재시도 바람."),
     PRODUCT_LOCK_CONFLICT(CONFLICT,"P005","구매에 대한 비관적 락 관련 오류"),
     STAGE_NOT_DEFINED(BAD_REQUEST,"P006","상품의 단계가 설정되지 않음");
+
     private final HttpStatus status;
     private final String code;
     private final String message;}

@@ -2,6 +2,8 @@ package com.lionkit.mogumarket.user.service;
 
 import com.lionkit.mogumarket.global.base.response.exception.BusinessException;
 import com.lionkit.mogumarket.global.base.response.exception.ExceptionType;
+import com.lionkit.mogumarket.point.entity.Point;
+import com.lionkit.mogumarket.point.service.PointService;
 import com.lionkit.mogumarket.user.entity.User;
 import com.lionkit.mogumarket.user.dto.request.SignUpRequestDto;
 import com.lionkit.mogumarket.user.dto.response.SignUpResponseDto;
@@ -18,6 +20,7 @@ public class UserService{
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PointService pointService;
 
 
 
@@ -31,7 +34,10 @@ public class UserService{
         User user = request.toEntity();
         user = userRepository.save(user);
 
-        return SignUpResponseDto.fromEntity(user);
+        // 회원가입과 함께 포인트 wallet 생성
+        Point point = pointService.createPointWallet(user.getId());
+
+        return SignUpResponseDto.fromEntity(user, point.getId());
     }
 
 

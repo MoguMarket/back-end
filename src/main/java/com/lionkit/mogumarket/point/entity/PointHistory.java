@@ -46,8 +46,8 @@ public class PointHistory extends BaseEntity {
     /**
      * 해당 포인트 이벤트에 의한 포인트 변화량.
      */
-    @Column(name = "volume", nullable = false)
-    private Integer volume;
+    @Column(name = "delta", nullable = false)
+    private long delta;
 
 
 
@@ -55,14 +55,14 @@ public class PointHistory extends BaseEntity {
      * 이벤트 전 사용 가능한 총 잔액 스냅샷 ( 검증용 )
      */
     @Column(name = "before_balance_snapshot")
-    private Integer beforeBalanceSnapshot;
+    private long beforeBalanceSnapshot;
 
 
     /**
      * 이벤트 이후 사용 가능한 총 잔액 스냅샷 ( 검증용 )
      */
     @Column(name = "after_balance_snapshot")
-    private Integer afterBalanceSnapshot;
+    private long afterBalanceSnapshot;
 
 
 

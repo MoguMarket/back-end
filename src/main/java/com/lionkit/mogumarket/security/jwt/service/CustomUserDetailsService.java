@@ -25,6 +25,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new PrincipalDetails(user);
     }
 
+    /**
+     * CustomUserDetailsService 을 사용하기 위해서 loadUserByUsername 은 필수 구현이기에 구현해놓았습니다.
+     * 실제 코드에서는 loadUserByUsername 대신 loadUserById 를 활용합니다.
+     * @param username
+     * @return
+     * @throws UsernameNotFoundException
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)

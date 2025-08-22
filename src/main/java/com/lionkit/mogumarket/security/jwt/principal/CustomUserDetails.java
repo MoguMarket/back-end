@@ -2,7 +2,8 @@ package com.lionkit.mogumarket.security.jwt.principal;
 
 
 /**
- * 자체로그인만을 위한 principal 구현체
+ * 자체로그인만을 위한 principal 구현체.
+ * oauth2 를 도입하므로써 이는 PrincipalDetails 로 대체하였습니다.
  */
 //@Getter
 //@Builder
