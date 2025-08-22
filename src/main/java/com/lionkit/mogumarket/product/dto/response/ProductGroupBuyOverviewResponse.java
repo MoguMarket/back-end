@@ -12,6 +12,7 @@ public record ProductGroupBuyOverviewResponse(
         double stock,
         String imageUrl,
         Long storeId, // 매핑된 store ID
+        String storeName,// 매핑된 store
 
 
         // 공구가 없으면 null/0 으로 내려감

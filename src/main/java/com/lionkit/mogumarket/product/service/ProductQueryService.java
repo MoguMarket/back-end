@@ -48,6 +48,8 @@ public class ProductQueryService {
                     .currentDiscountPercent(0.0)
                     .appliedUnitPrice(Math.round(p.getOriginalPricePerBaseUnit()))
                     .remainingToNextStage(null)
+                    .storeName(p.getStore().getName())
+                    .storeId(p.getStore().getId())
                     .build();
         }
 
@@ -74,6 +76,8 @@ public class ProductQueryService {
                 .productId(p.getId())
                 .name(p.getName())
                 .unit(p.getUnit().name())
+                .storeName(p.getStore().getName())
+                .storeId(p.getStore().getId())
                 .originalPricePerBaseUnit(p.getOriginalPricePerBaseUnit())
                 .stock(p.getStock())
                 .imageUrl(p.getImageUrl())
