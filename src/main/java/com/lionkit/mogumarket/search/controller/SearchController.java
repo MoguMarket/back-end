@@ -29,8 +29,8 @@ public class SearchController {
             description = "키워드를 기반으로 상품을 검색합니다. \n" +
                     "검색어는 상품명, 카테고리명, 브랜드명 등에서 일치하는 항목을 찾습니다."
     )
-    public ResponseEntity<ResponseBody<List<ProductDocument>>> search(@RequestParam String keyword) {
-        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(searchService.search(keyword)));
+    public ResponseEntity<ResponseBody<List<ProductDocument>>> search(@RequestParam String keyword,@RequestParam(required = false) Long marketId) {
+        return ResponseEntity.ok(ResponseUtil.createSuccessResponse(searchService.search(keyword, marketId)));
     }
 
     @GetMapping("/trending")

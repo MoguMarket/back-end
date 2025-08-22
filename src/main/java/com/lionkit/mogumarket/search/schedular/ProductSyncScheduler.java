@@ -10,13 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-
 
 @Slf4j
 @Component
@@ -24,29 +22,28 @@ import java.util.Objects;
 public class ProductSyncScheduler {
 
     private final ProductRepository productRepository;
-    private final ProductDocumentRepository productDocumentRepository; // ES 리포지토리
+    private final ProductDocumentRepository productDocumentRepository; // ES Repository
     private final SyncCheckpointService checkpointService;
 
     @Scheduled(cron = "${product.sync.cron:0 0 * * * *}")
     public void syncToES() {
         try {
-            // 0) 인덱스가 비어 있으면 1회 전량 색인(부트스트랩)
+            // 0) 인덱스가 비어 있으면 1회 전량 색인
             if (productDocumentRepository.count() == 0) {
                 log.info("[Bootstrap] ES index is empty. Reindexing all products...");
                 List<Product> all = productRepository.findAll();
                 saveAllToES(all);
-                // 체크포인트를 all의 max(modifiedAt)로 설정
                 LocalDateTime newCp = maxModifiedAt(all, checkpointService.loadLastSyncedAt());
                 checkpointService.saveLastSyncedAt(newCp);
                 log.info("[Bootstrap] Indexed {} products", all.size());
                 return;
             }
 
-            // 1) 마지막 체크포인트 로드(없으면 아주 과거)
+            // 1) 마지막 체크포인트
             LocalDateTime lastSynced = checkpointService.loadLastSyncedAt();
             log.debug("Last synced at: {}", lastSynced);
 
-            // 2) 증분: '>' 권장 (경계 중복/유실 방지)
+            // 2) 증분 대상
             List<Product> changed = productRepository.findByModifiedAtGreaterThan(lastSynced);
             if (changed.isEmpty()) {
                 log.info("No products to sync");
@@ -57,7 +54,7 @@ public class ProductSyncScheduler {
             // 3) 색인
             saveAllToES(changed);
 
-            // 4) 처리 배치의 max(modifiedAt)로 체크포인트 갱신
+            // 4) 체크포인트 갱신
             LocalDateTime newCheckpoint = maxModifiedAt(changed, lastSynced);
             checkpointService.saveLastSyncedAt(newCheckpoint);
             log.info("Successfully synced {} products to Elasticsearch. New checkpoint: {}",
@@ -70,18 +67,31 @@ public class ProductSyncScheduler {
 
     private void saveAllToES(List<Product> products) {
         List<ProductDocument> docs = products.stream()
-                .map(p -> ProductDocument.builder()
-                        .id(p.getId().toString())
-                        .productId(p.getId())
-                        .name(p.getName())
-                        .description(p.getDescription())
-                        .updatedAt(
-                                p.getModifiedAt() != null
-                                        ? p.getModifiedAt().atZone(ZoneId.systemDefault()).toInstant()
-                                        : Instant.now()
-                        )
-                        .build())
+                .map(p -> {
+                    Long storeId  = (p.getStore() != null) ? p.getStore().getId() : null;
+                    Long marketId = (p.getStore() != null && p.getStore().getMarket() != null)
+                            ? p.getStore().getMarket().getId() : null;
+
+                    // epoch millis 계산 (modifiedAt -> createdAt -> now 순)
+                    LocalDateTime baseTime = (p.getModifiedAt() != null)
+                            ? p.getModifiedAt()
+                            : (p.getCreatedAt() != null ? p.getCreatedAt() : LocalDateTime.now());
+                    long epochMillis = baseTime.atZone(ZoneId.systemDefault())
+                            .toInstant()
+                            .toEpochMilli();
+
+                    return ProductDocument.builder()
+                            .id(p.getId().toString())
+                            .productId(p.getId())
+                            .storeId(storeId)
+                            .marketId(marketId)
+                            .name(p.getName())
+                            .description(p.getDescription())
+                            .updatedAtMillis(epochMillis)
+                            .build();
+                })
                 .toList();
+
         productDocumentRepository.saveAll(docs);
     }
 
