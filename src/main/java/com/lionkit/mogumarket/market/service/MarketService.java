@@ -131,4 +131,7 @@ public class MarketService {
         if (key == null || key.isBlank()) return "<blank>";
         return key.length() <= 6 ? key + "****" : key.substring(0, 6) + "****";
     }
+
+
+
 }
