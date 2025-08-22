@@ -24,7 +24,7 @@ public class Cart extends BaseEntity  {
     @Column(name = "cart_id")
     private Long id;
 
-
+    private Integer quantity;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,6 +1,5 @@
 package com.lionkit.mogumarket.product.service;
 
-import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.product.dto.request.ProductPatchRequest;
 import com.lionkit.mogumarket.product.dto.request.ProductSaveRequest;
 import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
@@ -37,7 +36,6 @@ public class ProductService {
                 .stock(request.getStock())
                 .imageUrl(request.getImageUrl())
                 .store(store)
-                .category(CategoryType.valueOf(request.getCategory()))
                 .build();
 
         return productRepository.save(product).getId();

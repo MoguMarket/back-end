@@ -1,5 +1,5 @@
 package com.lionkit.mogumarket.product.controller;
-import com.lionkit.mogumarket.product.dto.ProductSaveRequest;
+import com.lionkit.mogumarket.product.dto.request.ProductSaveRequest;
 import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
 import com.lionkit.mogumarket.product.dto.response.ProductGroupBuyOverviewResponse;
 import com.lionkit.mogumarket.product.dto.response.ProductResponse;

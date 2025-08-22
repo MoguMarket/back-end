@@ -1,7 +1,6 @@
 package com.lionkit.mogumarket.review.controller;
 
 
-import com.lionkit.mogumarket.review.dto.*;
 import com.lionkit.mogumarket.review.dto.request.ReviewCreateRequest;
 import com.lionkit.mogumarket.review.dto.request.ReviewUpdateRequest;
 import com.lionkit.mogumarket.review.dto.response.RatingSummaryResponse;

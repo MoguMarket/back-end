@@ -2,7 +2,6 @@ package com.lionkit.mogumarket.review.service;
 
 import com.lionkit.mogumarket.product.entity.Product;
 import com.lionkit.mogumarket.product.repository.ProductRepository;
-import com.lionkit.mogumarket.review.dto.*;
 import com.lionkit.mogumarket.review.dto.request.ReviewCreateRequest;
 import com.lionkit.mogumarket.review.dto.request.ReviewUpdateRequest;
 import com.lionkit.mogumarket.review.dto.response.RatingSummaryResponse;
