@@ -190,4 +190,23 @@ public class ProductController {
     ) {
         return ResponseEntity.ok(productQueryService.getOverview(productId));
     }
+@GetMapping("/category/{category}")
+    @Operation(summary = "카테고리별 상품 목록")
+    public ResponseEntity<Page<ProductResponse>> listByCategoryPath(
+            @PathVariable CategoryType category,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        return ResponseEntity.ok(productService.listByCategory(category, page, size));
+    }
+
+    @GetMapping("/by-categories")
+    @Operation(summary = "여러 카테고리 상품 목록")
+    public ResponseEntity<Page<ProductResponse>> listByCategories(
+            @RequestParam List<CategoryType> categories,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        return ResponseEntity.ok(productService.listByCategories(categories, page, size));
+    }
 }
