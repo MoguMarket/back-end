@@ -2,14 +2,17 @@ package com.lionkit.mogumarket.order.service;
 
 import com.lionkit.mogumarket.global.base.response.exception.BusinessException;
 import com.lionkit.mogumarket.global.base.response.exception.ExceptionType;
+import com.lionkit.mogumarket.groupbuy.domain.GroupBuy;
+import com.lionkit.mogumarket.groupbuy.domain.GroupBuyStage;
+import com.lionkit.mogumarket.groupbuy.domain.GroupBuyStatus;
+import com.lionkit.mogumarket.groupbuy.repository.GroupBuyRepository;
+import com.lionkit.mogumarket.groupbuy.repository.GroupBuyStageRepository;
 import com.lionkit.mogumarket.order.entity.OrderLine;
-import com.lionkit.mogumarket.product.entity.Product;
-import com.lionkit.mogumarket.product.entity.ProductStage;
-import com.lionkit.mogumarket.product.repository.ProductRepository;
-import com.lionkit.mogumarket.product.service.ProductStageService;
 import com.lionkit.mogumarket.order.entity.Orders;
 import com.lionkit.mogumarket.order.enums.OrderStatus;
 import com.lionkit.mogumarket.order.repository.OrderRepository;
+import com.lionkit.mogumarket.product.entity.Product;
+import com.lionkit.mogumarket.product.repository.ProductRepository;
 import com.lionkit.mogumarket.user.entity.User;
 import com.lionkit.mogumarket.user.repository.UserRepository;
 import jakarta.persistence.LockTimeoutException;
@@ -18,73 +21,108 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
+import java.util.Comparator;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
+@Transactional // org.springframework.transaction.annotation.Transactional 로 import!
 public class OrderService {
 
-        private final ProductRepository productRepository;
-        private final UserRepository userRepository;
-        private final OrderRepository orderRepository;
-        private final ProductStageService stageService;
-        /**
-         * Product 행을 비관적 락으로 선점
-         * 재고/누적 수량 검증 & 반영
-         * 현재 단계 조회 후 단가 계산
-         * Orders(헤더) + OrderLine(라인) 생성/저장
-         */
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
-        public Long confirmSingleProductOrder(Long userId, Long productId, double qtyBase) {
+    // ⬇️ 신규 의존성: 공구/스테이지
+    private final GroupBuyRepository groupBuyRepository;
+    private final GroupBuyStageRepository groupBuyStageRepository;
 
-            try {
-                // TODO : productRepository 단을 직접 활용한 걸 productservice 단 메서드 정의하여 활용하도록 수정
-                // 1) 비관적 락 적용
-                Product product = productRepository
-                        .findForUpdate(productId)
-                        .orElseThrow(() -> new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
+    /**
+     * 단일 상품 주문 확정
+     */
+    public Long confirmSingleProductOrder(Long userId, Long productId, double qtyBase) {
+        try {
+            // 1) 상품 비관적 락
+            Product product = productRepository.findForUpdate(productId)
+                    .orElseThrow(() -> new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
 
-                // 2) 재고 검증 & 수량 누적 반영
-                product.increaseCurrentBaseQty(qtyBase);
+            // 2) 재고/누적 반영 (프로젝트에 맞게 구현되어 있다고 가정)
+            product.increaseCurrentBaseQty(qtyBase);
 
-                // 3) 현재 단계/단가 스냅샷
-                ProductStage stage = stageService.getCurrentStage(product);
-                if (stage == null) throw new BusinessException(ExceptionType.STAGE_NOT_DEFINED);
+            // 3) 공구/할인/단가 계산
+            PriceSnapshot snap = calcPriceSnapshot(product);
 
-                double discountPercent = stage.getDiscountPercent();
-                double unitPrice = stageService.getAppliedUnitPrice(product);
+            // 4) 주문 헤더/라인 생성
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new BusinessException(ExceptionType.USER_NOT_FOUND));
 
-                // 4) 주문 헤더/라인 생성
-                User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new BusinessException(ExceptionType.USER_NOT_FOUND));
+            Orders orders = Orders.builder()
+                    .user(user)
+                    .status(OrderStatus.CONFIRMED)
+                    .build();
 
-                Orders orders = Orders.builder()
-                        .user(user)
-                        .status(OrderStatus.CONFIRMED)
-                        .build();
+            OrderLine line = OrderLine.builder()
+                    .orders(orders)
+                    .product(product)
+                    .orderedBaseQty(qtyBase)
+                    .levelSnapshot(snap.level)                   // 0이면 공구/스테이지 없음
+                    .discountPercentSnapshot(snap.discountPercent)
+                    .unitPriceSnapshot(snap.unitPrice)           // 기준단위당 적용 단가(원)
+                    .build();
 
-                OrderLine line = OrderLine.builder()
-                        .orders(orders)
-                        .product(product)
-                        .orderedBaseQty(qtyBase)                     // 기준단위(g/ml/ea) 기준 수량
-                        .levelSnapshot(stage.getLevel())
-                        .discountPercentSnapshot(discountPercent)
-                        .unitPriceSnapshot(unitPrice)                // 기준단위당 단가 스냅샷
-                        .build();
+            orders.getLines().add(line); // cascade = ALL 가정
 
-                orders.getLines().add(line); // cascade = ALL 로 라인 자동 저장
+            return orderRepository.save(orders).getId();
 
+        } catch (LockTimeoutException e) {
+            throw new BusinessException(ExceptionType.PRODUCT_LOCK_TIMEOUT);
+        } catch (PessimisticLockException e) {
+            throw new BusinessException(ExceptionType.PRODUCT_LOCK_CONFLICT);
+        }
+    }
 
-                return orderRepository.save(orders).getId();
+    /**
+     * 진행중 공구 기준으로 할인/단계/단가 계산.
+     * 없으면 할인 0, 레벨 0, 단가는 원가.
+     */
+    private PriceSnapshot calcPriceSnapshot(Product product) {
+        GroupBuy gb = groupBuyRepository
+                .findTopByProductAndStatusOrderByCreatedAtDesc(product, GroupBuyStatus.OPEN)
+                .orElse(null);
 
-            }catch ( LockTimeoutException e) { // 락 대기초과(5초) — 사용자 재시도 유도
-                    throw new BusinessException(ExceptionType.PRODUCT_LOCK_TIMEOUT);
-                } catch ( PessimisticLockException e) { // 비관적 락 관련 실패
-                    throw new BusinessException(ExceptionType.PRODUCT_LOCK_CONFLICT);
-                }
-
+        if (gb == null) {
+            double original = product.getOriginalPricePerBaseUnit();
+            return new PriceSnapshot(0, 0.0, Math.round(original));
         }
 
+        double totalQty = gb.getCurrentQty();
+        GroupBuyStage cur = groupBuyStageRepository
+                .findTopByGroupBuyAndStartQtyLessThanEqualOrderByStartQtyDesc(gb, totalQty);
 
+        if (cur == null) {
+            double original = product.getOriginalPricePerBaseUnit();
+            return new PriceSnapshot(0, 0.0, Math.round(original));
+        }
 
+        // 레벨(1..N) 계산: startQty 오름차순으로 몇 번째인지
+        int level = resolveLevelIndex(gb, cur);
+
+        double discount = cur.getDiscountPercent();
+        double applied = product.getOriginalPricePerBaseUnit() * ((100.0 - discount) / 100.0);
+        long unitPrice = Math.round(applied);
+
+        return new PriceSnapshot(level, discount, unitPrice);
+    }
+
+    private int resolveLevelIndex(GroupBuy gb, GroupBuyStage current) {
+        List<GroupBuyStage> stages = groupBuyStageRepository.findByGroupBuyOrderByStartQtyAsc(gb);
+        for (int i = 0; i < stages.size(); i++) {
+            if (stages.get(i).getId().equals(current.getId())) {
+                return i + 1; // 1-based
+            }
+        }
+        return 0;
+    }
+
+    private record PriceSnapshot(int level, double discountPercent, long unitPrice) {}
 }
-

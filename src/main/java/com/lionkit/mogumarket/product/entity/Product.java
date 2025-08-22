@@ -1,6 +1,5 @@
 package com.lionkit.mogumarket.product.entity;
 
-import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
 import com.lionkit.mogumarket.product.enums.Unit;
 import com.lionkit.mogumarket.review.entity.Review;
@@ -36,15 +35,16 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Unit unit;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true) // ← DB가 DEFAULT NULL이면 일단 true로 맞추는 게 안전
-    private CategoryType category;
-
     @Column(nullable = false)
     private double originalPricePerBaseUnit;
 
     @Column(nullable = false)
     private double stock;
+
+    // ★ 누적 기준단위 수량 (DB: current_base_qty)
+    @Builder.Default
+    @Column(name = "current_base_qty", nullable = false)
+    private double currentBaseQty = 0;
 
     private String imageUrl;
 
@@ -56,8 +56,23 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+
+    /** 재고 검증 후 누적 수량 증가 */
+    public void increaseCurrentBaseQty(double qtyBase) {
+        if (qtyBase <= 0) {
+            throw new IllegalArgumentException("qtyBase must be > 0");
+        }
+        double next = this.currentBaseQty + qtyBase;
+        if (next > this.stock) {
+            // 공통 예외체계가 있다면 BusinessException(ExceptionType.STOCK_OVERFLOW)로 교체
+            throw new IllegalStateException("재고 초과: 요청=" + qtyBase + ", 남은=" + (this.stock - this.currentBaseQty));
+        }
+        this.currentBaseQty = next;
+    }
+
+
     public void update(String name, String description, Unit unit, Double originalPrice,
-                       Double stock, String imageUrl, Store store , CategoryType category) {
+                       Double stock, String imageUrl, Store store) {
         if (name != null) this.name = name;
         if (description != null) this.description = description;
         if (unit != null) this.unit = unit;
@@ -65,8 +80,6 @@ public class Product extends BaseEntity {
         if (stock != null) this.stock = stock;
         if (imageUrl != null) this.imageUrl = imageUrl;
         if (store != null) this.store = store;
-        if (category != null) this.category = category;
-
     }
 
     public void patch(Double originalPrice, String imageUrl) {

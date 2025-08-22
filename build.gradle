@@ -70,6 +70,10 @@ dependencies {
 	// portone
 	implementation group: 'io.portone', name: 'server-sdk', version: '0.19.2'
 
+	//webclient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+
 }
 
 tasks.named('test') {

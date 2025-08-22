@@ -10,7 +10,6 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 @Service

@@ -78,9 +78,7 @@ public class ProductService {
                 request.getStoreId() != null ?
                         storeRepository.findById(request.getStoreId())
                                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Store ID"))
-                        : null,
-                request.getCategory()
-
+                        : null
         );
     }
 
