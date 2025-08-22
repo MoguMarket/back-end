@@ -8,10 +8,6 @@ import com.lionkit.mogumarket.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
-import com.lionkit.mogumarket.product.dto.request.ProductSaveRequest;
-import com.lionkit.mogumarket.product.dto.response.ProductResponse;
-import com.lionkit.mogumarket.product.service.ProductService;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -72,17 +68,7 @@ public class ProductController {
             )
             @RequestBody ProductSaveRequest request
     ) {
-public class ProductController {
 
-    private final ProductService productService;
-
-    // 상품 등록
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "상품 등록")
-    @ApiResponse(responseCode = "201", description = "생성 성공",
-            content = @Content(schema = @Schema(implementation = Long.class),
-                    examples = @ExampleObject(value = "101")))
-    public ResponseEntity<Long> createProduct(@RequestBody ProductSaveRequest request) {
         Long productId = productService.saveProduct(request);
         return ResponseEntity.status(201).body(productId);
     }
@@ -172,7 +158,6 @@ public class ProductController {
 
     // 상품 삭제
     @DeleteMapping("/{id}")
-
     @Operation(
             summary = "상품 삭제",
             description = "상품을 삭제합니다."
