@@ -3,6 +3,7 @@ package com.lionkit.mogumarket.market.service;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class MarketService {
 
-    private final WebClient odcloud;
+    private final @Qualifier("odcloud") WebClient odcloud;
 
     @Value("${odcloud.service.key:${ODCLOUD_SERVICE_KEY:}}")
     private String serviceKeyRaw;
