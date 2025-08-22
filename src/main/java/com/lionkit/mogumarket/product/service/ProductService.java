@@ -118,4 +118,14 @@ public class ProductService {
                 .findByCategoryInOrderByCreatedAtDesc(categories, pageable)
                 .map(ProductResponse::fromEntity);
     }
+
+    public Page<ProductResponse> listByPrice(Double min, Double max, int page, int size) {
+        double lo = (min == null) ? 0 : min;
+        double hi = (max == null) ? Double.MAX_VALUE : max;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return productRepository
+                .findByOriginalPricePerBaseUnitBetweenOrderByCreatedAtDesc(lo, hi, pageable)
+                .map(ProductResponse::fromEntity);
+    }
+
 }

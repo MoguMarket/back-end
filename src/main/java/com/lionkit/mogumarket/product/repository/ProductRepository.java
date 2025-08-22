@@ -46,6 +46,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 다중 카테고리(선택): IN 조건
     Page<Product> findByCategoryInOrderByCreatedAtDesc(List<CategoryType> categories, Pageable pageable);
 
+    Page<Product> findByOriginalPricePerBaseUnitBetweenOrderByCreatedAtDesc(
+            double min, double max, Pageable pageable
+    );
+
 }
 
 
