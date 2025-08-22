@@ -53,6 +53,10 @@ public class Product extends BaseEntity {
     private Store store;
 
     @Builder.Default
+    @Column(name = "current_base_qty", nullable = false)
+    private double currentBaseQty = 0;
+
+    @Builder.Default
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
@@ -72,5 +76,17 @@ public class Product extends BaseEntity {
     public void patch(Double originalPrice, String imageUrl) {
         if (originalPrice != null) this.originalPricePerBaseUnit = originalPrice;
         if (imageUrl != null) this.imageUrl = imageUrl;
+    }
+
+    public void increaseCurrentBaseQty(double qtyBase) {
+        if (qtyBase <= 0) {
+            throw new IllegalArgumentException("qtyBase must be > 0");
+        }
+        double next = this.currentBaseQty + qtyBase;
+        if (next > this.stock) {
+            // 공통 예외체계가 있다면 BusinessException(ExceptionType.STOCK_OVERFLOW)로 교체
+            throw new IllegalStateException("재고 초과: 요청=" + qtyBase + ", 남은=" + (this.stock - this.currentBaseQty));
+        }
+        this.currentBaseQty = next;
     }
 }

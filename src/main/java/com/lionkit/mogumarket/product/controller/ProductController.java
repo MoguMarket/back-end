@@ -1,4 +1,5 @@
 package com.lionkit.mogumarket.product.controller;
+import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.product.dto.request.ProductSaveRequest;
 import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
 import com.lionkit.mogumarket.product.dto.response.ProductGroupBuyOverviewResponse;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

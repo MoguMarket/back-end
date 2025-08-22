@@ -16,6 +16,7 @@ public class ProductResponse {
     private String imageUrl;
     private double originalPricePerBaseUnit;
     private double stock;
+    private Long storeID; // 매핑된 store ID
     private double rating;   // 평균 별점
     private LocalDateTime createdAt;
 
@@ -34,6 +35,7 @@ public class ProductResponse {
                 .imageUrl(product.getImageUrl())
                 .originalPricePerBaseUnit(product.getOriginalPricePerBaseUnit())
                 .stock(product.getStock())
+                .storeID(product.getStore().getId())
                 .rating(avgRating)
                 .createdAt(product.getCreatedAt())
                 .build();
