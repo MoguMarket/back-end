@@ -25,14 +25,23 @@ public class Cart extends BaseEntity  {
     private Long id;
 
 
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartLine> lines = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
+    public void increase(int amount) {
+        this.quantity += amount;
+    }
 
-
+    public void changeQuantity(int quantity) {
+        if (quantity < 1) throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
+        this.quantity = quantity;
+    }
 }
+
