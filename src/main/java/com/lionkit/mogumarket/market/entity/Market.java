@@ -37,10 +37,10 @@ public class Market extends BaseEntity {
 
     private String description;    // 시장 설명
 
-    @Column(precision = 10, scale = 7)  // 예: 37.5665353
+    @Column(columnDefinition = "DOUBLE")  // 예: 37.5665353
     private Double latitude;
 
-    @Column(precision = 10, scale = 7)  // 예: 126.9779692
+    @Column(columnDefinition = "DOUBLE")  // 예: 126.9779692
     private Double longitude;
 
     // distance는 그대로 int 사용 (단위는 팀 컨벤션에 맞춰 m 또는 km 명시)
