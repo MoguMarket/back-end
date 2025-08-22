@@ -11,6 +11,8 @@ public record ProductGroupBuyOverviewResponse(
         double originalPricePerBaseUnit,
         double stock,
         String imageUrl,
+        Long storeId, // 매핑된 store ID
+
 
         // 공구가 없으면 null/0 으로 내려감
         Long groupBuyId,
