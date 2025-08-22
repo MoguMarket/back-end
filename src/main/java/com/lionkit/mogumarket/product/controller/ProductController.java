@@ -1,5 +1,4 @@
 package com.lionkit.mogumarket.product.controller;
-
 import com.lionkit.mogumarket.product.dto.ProductSaveRequest;
 import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
 import com.lionkit.mogumarket.product.dto.response.ProductGroupBuyOverviewResponse;
@@ -10,11 +9,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -69,6 +68,7 @@ public class ProductController {
             )
             @RequestBody ProductSaveRequest request
     ) {
+
         Long productId = productService.saveProduct(request);
         return ResponseEntity.status(201).body(productId);
     }
@@ -169,6 +169,7 @@ public class ProductController {
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
             @ApiResponse(responseCode = "404", description = "상품 없음")
     })
+
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
