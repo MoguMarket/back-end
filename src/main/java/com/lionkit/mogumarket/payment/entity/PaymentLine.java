@@ -2,6 +2,7 @@ package com.lionkit.mogumarket.payment.entity;
 
 
 import com.lionkit.mogumarket.order.entity.OrderLine;
+import com.lionkit.mogumarket.payment.enums.RefundType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,13 +31,17 @@ public class PaymentLine {
     @JoinColumn(name = "order_line_id", nullable = false)
     private OrderLine orderLine;
 
-    /** 배분된 현금/포인트 금액(원). 합계는 Payment·Orders와 일치해야 함 */
-    @Column(nullable = false) private Long cashAmount;
-    @Column(nullable = false) private Long pointAmount;
 
-    /** 환불 누적치 — 부분환불 다회 발생 시 트래킹 */
-    @Column(nullable = false) @Builder.Default private Long refundedCash = 0L;
-    @Column(nullable = false) @Builder.Default private Long refundedPoint = 0L;
+    /**
+     * 환불 금액
+     */
+    @Column(nullable = false)
+    @Builder.Default
+    private Long refundedAmount = 0L;
+
+
+
+
 
 
 }

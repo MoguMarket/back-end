@@ -38,6 +38,7 @@ out/
 
 # 설정 파일
 .yml
+.properties
 
 data
 .env
