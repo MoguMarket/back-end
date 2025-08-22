@@ -1,7 +1,6 @@
 package com.lionkit.mogumarket.product.dto.request;
 
 
-import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.product.enums.Unit;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,5 +17,4 @@ public class ProductUpdateRequest {
     private String imageUrl;
     private LocalDateTime deadline;
     private Long storeId;         // 소속 스토어 변경 시
-    private CategoryType category; // 카테고리 변경 시
 }
