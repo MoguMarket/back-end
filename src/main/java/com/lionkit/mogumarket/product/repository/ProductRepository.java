@@ -50,6 +50,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             double min, double max, Pageable pageable
     );
 
+    @Query("""
+      select p
+      from Product p
+      join fetch p.store s
+      join fetch s.market
+      where p.id = :id
+    """)
+    Optional<Product> findWithStoreAndMarketById(@Param("id") Long id);
+
+    Page<Product> findByStoreId(Long storeId, Pageable pageable);
+
+    Page<Product> findByStore_Market_Id(Long marketId, Pageable pageable);
+
+
 }
 
 

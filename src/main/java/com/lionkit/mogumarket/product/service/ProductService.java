@@ -35,6 +35,7 @@ public class ProductService {
                 .unit(request.getUnit())
                 .originalPricePerBaseUnit(request.getOriginalPrice())
                 .stock(request.getStock())
+                .unit(request.getUnit())
                 .imageUrl(request.getImageUrl())
                 .store(store)
                 .category(CategoryType.valueOf(request.getCategory()))
@@ -53,13 +54,20 @@ public class ProductService {
 
     // READ: 목록
     @Transactional(readOnly = true)
-    public Page<ProductResponse> list(Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(
-                page == null ? 0 : page,
-                size == null ? 10 : size,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
-        return productRepository.findAll(pageable).map(ProductResponse::fromEntity);
+    public Page<ProductResponse> list(Integer page, Integer size, Long marketId) {
+        int p = (page == null || page < 0) ? 0 : page;
+        int s = (size == null || size < 1 || size > 100) ? 10 : size;
+
+        Pageable pageable = PageRequest.of(p, s, Sort.by(Sort.Direction.DESC, "id"));
+
+        Page<Product> products;
+        if (marketId != null) {
+            products = productRepository.findByStore_Market_Id(marketId, pageable);
+        } else {
+            products = productRepository.findAll(pageable);
+        }
+
+        return products.map(ProductResponse::fromEntity); // from(Product) 정적 메서드 가정
     }
 
     // UPDATE: 전체 수정

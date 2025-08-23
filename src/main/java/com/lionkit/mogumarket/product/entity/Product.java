@@ -40,6 +40,10 @@ public class Product extends BaseEntity {
     @Column(nullable = true) // ← DB가 DEFAULT NULL이면 일단 true로 맞추는 게 안전
     private CategoryType category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private Unit baseUnit; // 기본 단위, 예: KG, EA 등
+
     @Column(nullable = false)
     private double originalPricePerBaseUnit;
 

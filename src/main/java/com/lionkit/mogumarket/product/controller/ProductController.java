@@ -112,9 +112,11 @@ public class ProductController {
     })
     public ResponseEntity<Page<ProductResponse>> listProducts(
             @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(name= "marketId", description = "마켓 ID", example = "1")
+            @RequestParam(required = false) Long marketId
     ) {
-        return ResponseEntity.ok(productService.list(page, size));
+        return ResponseEntity.ok(productService.list(page, size,marketId));
     }
 
     // 상품 전체 수정
