@@ -4,6 +4,9 @@ package com.lionkit.mogumarket.store.service;
 
 import com.lionkit.mogumarket.market.entity.Market;
 import com.lionkit.mogumarket.market.repository.MarketRepository;
+import com.lionkit.mogumarket.product.dto.response.ProductResponse;
+import com.lionkit.mogumarket.product.entity.Product;
+import com.lionkit.mogumarket.product.repository.ProductRepository;
 import com.lionkit.mogumarket.store.dto.request.StoreSaveRequest;
 import com.lionkit.mogumarket.store.dto.response.StoreResponse;
 import com.lionkit.mogumarket.store.entity.Store;
@@ -22,6 +25,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final MarketRepository marketRepository; // optional link
     private final UserRepository userRepository;     // optional link
+    private final ProductRepository productRepository; // 상품 조회용
 
     /** 스토어 등록 */
     @Transactional
@@ -86,5 +90,21 @@ public class StoreService {
         }
 
         return result.map(StoreResponse::from);
+    }
+
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getProductsByStoreId(Long id, Integer page, Integer size) {
+        int p = (page == null || page < 0) ? 0 : page;
+        int s = (size == null || size < 1 || size > 100) ? 10 : size;
+
+        // 스토어 존재 확인 (404 유사 처리)
+        storeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("스토어를 찾을 수 없습니다. id=" + id));
+
+        Pageable pageable = PageRequest.of(p, s);
+        Page<Product> products = productRepository.findByStoreId(id, pageable);
+
+        return products.map(ProductResponse::fromEntity); // 이미 ProductResponse.from(Product) 있을 것으로 가정
     }
 }

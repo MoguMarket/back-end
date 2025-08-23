@@ -2,10 +2,15 @@ package com.lionkit.mogumarket.store.controller;
 
 
 
+import com.lionkit.mogumarket.product.dto.response.ProductResponse;
 import com.lionkit.mogumarket.store.dto.request.StoreSaveRequest;
 import com.lionkit.mogumarket.store.dto.response.StoreResponse;
 import com.lionkit.mogumarket.store.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,5 +46,27 @@ public class StoreController {
             @RequestParam(required = false) Long marketId
     ) {
         return ResponseEntity.ok(storeService.list(page, size, marketId));
+    }
+
+    @GetMapping("/products/{id}")
+    @Operation(
+            summary = "스토어의 상품 목록 조회",
+            description = "스토어 ID로 상품 목록을 페이지 단위로 반환합니다."
+    )
+    @Parameters({
+            @Parameter(name = "id", description = "스토어 ID", example = "1", required = true),
+            @Parameter(name = "page", description = "페이지 번호(0부터 시작)", example = "0"),
+            @Parameter(name = "size", description = "페이지 크기", example = "10")
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "스토어 없음")
+    })
+    public ResponseEntity<Page<ProductResponse>> getProductsByStoreId(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        return ResponseEntity.ok(storeService.getProductsByStoreId(id, page, size));
     }
 }
