@@ -7,6 +7,8 @@ import com.lionkit.mogumarket.groupbuy.domain.GroupBuyStatus;
 import com.lionkit.mogumarket.product.entity.Product;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +32,5 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     @QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000"))
     Optional<GroupBuy> findForUpdate(@Param("id") Long id);
 
+    Page<GroupBuy> findByStatusAndEndAtAfter(GroupBuyStatus status, LocalDateTime now, Pageable pageable);
 }

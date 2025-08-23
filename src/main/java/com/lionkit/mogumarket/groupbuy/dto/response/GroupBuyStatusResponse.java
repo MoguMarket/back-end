@@ -4,11 +4,15 @@ import com.lionkit.mogumarket.groupbuy.domain.GroupBuyStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class GroupBuyStatusResponse {
     private Long groupBuyId;
     private GroupBuyStatus status;
+    private int stageCount;
+
 
     private double totalQuantity;         // 누적 참여 수량
     private double targetQuantity;
@@ -18,6 +22,8 @@ public class GroupBuyStatusResponse {
 
     private double originalUnitPrice;      // 상품 기준단위 원가
     private long appliedUnitPrice;         // 현재 단계 할인 반영 단가(원, 반올림)
+
+    private LocalDateTime endAt; // 마감 시간
 
 
 }

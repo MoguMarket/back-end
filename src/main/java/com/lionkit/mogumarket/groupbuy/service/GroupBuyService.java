@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class GroupBuyService {
     /** 공동구매 생성 */
     @Transactional
     public Long createGroupBuy(Long productId, double targetQty,
-                               double maxDiscountPercent, int stageCount) {
+                               double maxDiscountPercent, int stageCount, LocalDateTime startAt,LocalDateTime endAt) {
         if (targetQty <= 0) throw new IllegalArgumentException("targetQty must be > 0");
         if (maxDiscountPercent < 0 || maxDiscountPercent > 90) throw new IllegalArgumentException("maxDiscount out of range");
         if (stageCount < 1 || stageCount > 10) throw new IllegalArgumentException("stageCount out of range");
@@ -47,6 +48,8 @@ public class GroupBuyService {
                 .currentQty(0)
                 .status(GroupBuyStatus.OPEN)
                 .maxDiscountPercent(maxDiscountPercent)
+                .startAt(startAt) // 시작 시간 추가
+                .endAt(endAt) // 마감 시간 추가
                 .build();
 
         // 단계 자동 생성 (균등 분할 예시)
@@ -134,13 +137,16 @@ public class GroupBuyService {
                 .mapToDouble(GroupBuyOrder::getQuantity)
                 .sum();
 
-        double currentDiscount = stageRepository.findByGroupBuyOrderByStartQtyAsc(gb).stream()
+        var stages = stageRepository.findByGroupBuyOrderByStartQtyAsc(gb);
+        int stageCount = stages.size(); // 단계 수 추가
+
+        double currentDiscount = stages.stream()
                 .filter(s -> totalQty >= s.getStartQty())
                 .max(Comparator.comparingDouble(GroupBuyStage::getStartQty))
                 .map(GroupBuyStage::getDiscountPercent)
                 .orElse(0.0);
 
-        double remainingToNext = stageRepository.findByGroupBuyOrderByStartQtyAsc(gb).stream()
+        double remainingToNext = stages.stream()
                 .filter(s -> totalQty < s.getStartQty())
                 .min(Comparator.comparingDouble(GroupBuyStage::getStartQty))
                 .map(s -> s.getStartQty() - totalQty)
@@ -158,6 +164,7 @@ public class GroupBuyService {
                 .remainingToNextStage(remainingToNext)
                 .originalUnitPrice(original)
                 .appliedUnitPrice(applied)
+                .stageCount(stageCount)  // 👈 단계 수 내려줌
                 .build();
     }
 
