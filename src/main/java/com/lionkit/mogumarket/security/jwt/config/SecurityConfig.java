@@ -39,7 +39,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // ✅ Security 레이어에서 CORS 활성화 (아래 corsConfigurationSource() 사용)
+                // Security 레이어에서 CORS 활성화 (아래 corsConfigurationSource() 사용)
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
@@ -50,10 +50,10 @@ public class SecurityConfig {
                         .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ 프리플라이트는 모두 허용
+                        // 프리플라이트는 모두 허용
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ✅ 공개 엔드포인트 (기존 것 유지 + 수정)
+                        // 공개 엔드포인트 (기존 것 유지 + 수정)
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/user/sign-up",
@@ -63,7 +63,7 @@ public class SecurityConfig {
                                 "/api/auth/me"
                         ).permitAll()
 
-                        // ✅ FCM: 공개는 vapid-key만, 나머지는 인증 필요
+                        // FCM: 공개는 vapid-key만, 나머지는 인증 필요
                         .requestMatchers(HttpMethod.GET, "/api/fcm/web/vapid-key").permitAll()
                         .requestMatchers("/api/fcm/**").authenticated()
 
@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler)
                 )
-                // ✅ JWT 필터
+                // JWT 필터
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class
@@ -89,21 +89,5 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ Security용 CORS: Authorization 헤더/메서드/오리진 허용
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:63342"
-        ));
-        c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        c.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin","X-Requested-With"));
-        c.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
-        src.registerCorsConfiguration("/**", c);
-        return src;
-        // (필요하면) c.setExposedHeaders(List.of("Authorization"));
-    }
+
 }
