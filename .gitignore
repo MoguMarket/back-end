@@ -37,13 +37,13 @@ out/
 .vscode/
 
 # 설정 파일
-.yml
-.properties
 
 data
 .env
 
 .DS_Store
-src/main/resources/application.ymlsrc/main/resources/application.properties
-
 firebase-service-account.json
+
+src/main/resources/*.yml
+src/main/resources/*.properties
+
