@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -25,13 +26,14 @@ public class ProductSyncScheduler {
     private final ProductDocumentRepository productDocumentRepository; // ES Repository
     private final SyncCheckpointService checkpointService;
 
+    @Transactional(readOnly = true)
     @Scheduled(cron = "${product.sync.cron:0 0 * * * *}")
     public void syncToES() {
         try {
             // 0) 인덱스가 비어 있으면 1회 전량 색인
             if (productDocumentRepository.count() == 0) {
                 log.info("[Bootstrap] ES index is empty. Reindexing all products...");
-                List<Product> all = productRepository.findAll();
+                List<Product> all = productRepository.findAllBy();
                 saveAllToES(all);
                 LocalDateTime newCp = maxModifiedAt(all, checkpointService.loadLastSyncedAt());
                 checkpointService.saveLastSyncedAt(newCp);
@@ -44,6 +46,7 @@ public class ProductSyncScheduler {
             log.debug("Last synced at: {}", lastSynced);
 
             // 2) 증분 대상
+            // @EntityGraph 가 붙은 메서드를 사용
             List<Product> changed = productRepository.findByModifiedAtGreaterThan(lastSynced);
             if (changed.isEmpty()) {
                 log.info("No products to sync");
