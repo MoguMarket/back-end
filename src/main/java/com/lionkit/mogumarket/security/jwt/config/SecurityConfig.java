@@ -11,11 +11,17 @@ import com.lionkit.mogumarket.security.oauth2.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -30,51 +36,74 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // ✅ Security 레이어에서 CORS 활성화 (아래 corsConfigurationSource() 사용)
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling((exceptions) -> exceptions
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                         .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ 프리플라이트는 모두 허용
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // ✅ 공개 엔드포인트 (기존 것 유지 + 수정)
                         .requestMatchers(
                                 "/api/auth/login",
-                                "/api/user/sign-up",// 로그인, 회원가입
-                                "admin/sync-products",// 관리자용 API: 수동으로 상품 데이터를 Elasticsearch에 동기화
-                                "/api/search", // 검색
-                                "/api/search/trending",// 인기 검색어
-                                "/api/fcm/",// FCM 관련 API
-                                "/api/fcm/send",
-                                "/api/auth/me")
-                        .permitAll()
+                                "/api/user/sign-up",
+                                "/admin/sync-products",       // ← 앞 슬래시 보정
+                                "/api/search",
+                                "/api/search/trending",
+                                "/api/auth/me"
+                        ).permitAll()
+
+                        // ✅ FCM: 공개는 vapid-key만, 나머지는 인증 필요
+                        .requestMatchers(HttpMethod.GET, "/api/fcm/web/vapid-key").permitAll()
+                        .requestMatchers("/api/fcm/**").authenticated()
+
+                        // 그 외는 기존 정책대로
                         .requestMatchers(
                                 "/api/carts/**",
-                                "/api/user/complete-sign-up")
-                        .authenticated() // ← 장바구니는 인증 필요
+                                "/api/user/complete-sign-up"
+                        ).authenticated()
+
                         .anyRequest().permitAll()
                 )
-
-                // oauth2 설정
                 .oauth2Login(oauth -> oauth
-                        .userInfoEndpoint(c -> c.userService(customOAuth2UserService)) // 사용자 정보를 어디서 load 할지 설정
-                        .successHandler(oAuth2SuccessHandler) // 로그인 성공 시 핸들러
-                        .failureHandler(oAuth2FailureHandler) // 로그인 실패 시 핸들러
+                        .userInfoEndpoint(c -> c.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
                 )
-
-                // jwt 설정
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService), UsernamePasswordAuthenticationFilter.class);  // JWT 인증 필터 추가;
-
+                // ✅ JWT 필터
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
 
-
+    // ✅ Security용 CORS: Authorization 헤더/메서드/오리진 허용
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration c = new CorsConfiguration();
+        c.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:63342"
+        ));
+        c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        c.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin","X-Requested-With"));
+        c.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+        src.registerCorsConfiguration("/**", c);
+        return src;
+        // (필요하면) c.setExposedHeaders(List.of("Authorization"));
+    }
 }
