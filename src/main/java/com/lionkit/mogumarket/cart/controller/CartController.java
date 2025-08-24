@@ -1,8 +1,10 @@
 package com.lionkit.mogumarket.cart.controller;
 
-import com.lionkit.mogumarket.cart.dto.request.AddCartRequest;
-import com.lionkit.mogumarket.cart.dto.reaponse.CartItemResponse;
-import com.lionkit.mogumarket.cart.dto.request.UpdateCartRequest;
+import com.lionkit.mogumarket.cart.dto.request.CartBulkSetRequest;
+import com.lionkit.mogumarket.cart.dto.request.CartLineUpsertRequest;
+import com.lionkit.mogumarket.cart.dto.response.CartLineResponse;
+import com.lionkit.mogumarket.cart.dto.response.CartSummaryResponse;
+import com.lionkit.mogumarket.cart.enums.PurchaseRoute;
 import com.lionkit.mogumarket.cart.service.CartService;
 import com.lionkit.mogumarket.security.oauth2.principal.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,62 +25,76 @@ public class CartController {
 
     private final CartService cartService;
 
-    @PostMapping
-    @Operation(summary = "장바구니에 상품 추가", description = "사용자의 장바구니에 상품을 추가합니다.")
-    public ResponseEntity<Void> add(
-            @Valid @RequestBody AddCartRequest req,
-            @AuthenticationPrincipal PrincipalDetails principal
-    ) {
-        Long userId = principal.getUser().getId();
-        cartService.add(userId, req.productId(), req.quantity());
-        return ResponseEntity.ok().build();
-    }
 
-    @GetMapping
+    @GetMapping("/lines")
     @Operation(
-            summary = "장바구니 목록 조회",
-            description = "사용자의 장바구니에 담긴 상품 목록을 조회합니다."
+            summary = "장바구니 라인 목록",
+            description = "사용자의 장바구니 라인과 라인별 적용 단가/금액을 조회합니다."
     )
-    public ResponseEntity<List<CartItemResponse>> list(
+    public ResponseEntity<List<CartLineResponse>> list(
             @AuthenticationPrincipal PrincipalDetails principal
     ) {
         Long userId = principal.getUser().getId();
         return ResponseEntity.ok(cartService.list(userId));
     }
 
-    @PatchMapping("/{productId}")
+    @GetMapping("/summary")
     @Operation(
-            summary = "장바구니 상품 수량 업데이트",
-            description = "장바구니에 담긴 특정 상품의 수량을 업데이트합니다."
+            summary = "장바구니 요약",
+            description = "라인 목록과 총 수량/총 금액 요약 정보를 반환합니다."
     )
-    public ResponseEntity<Void> updateQuantity(
-            @PathVariable Long productId,
-            @Valid @RequestBody UpdateCartRequest req,
+    public ResponseEntity<CartSummaryResponse> summary(
             @AuthenticationPrincipal PrincipalDetails principal
     ) {
         Long userId = principal.getUser().getId();
-        cartService.updateQuantity(userId, productId, req.quantity());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(cartService.summary(userId));
     }
 
-    @DeleteMapping("/{productId}")
+    @PostMapping("/lines")
     @Operation(
-            summary = "장바구니에서 상품 제거",
-            description = "장바구니에서 특정 상품을 제거합니다."
+            summary = "장바구니 라인 단건 추가/수정",
+            description = "qtyBase=0 이면 해당 라인을 삭제합니다. 그 외엔 신규 생성 또는 수량 절대값 변경입니다."
     )
-    public ResponseEntity<Void> remove(
-            @PathVariable Long productId,
+    public ResponseEntity<List<CartLineResponse>> upsertLine(
+            @Valid @RequestBody CartLineUpsertRequest req,
             @AuthenticationPrincipal PrincipalDetails principal
     ) {
         Long userId = principal.getUser().getId();
-        cartService.remove(userId, productId);
+        return ResponseEntity.ok(cartService.addOrUpdateCartLine(userId, req));
+    }
+
+    @PostMapping("/bulk-set")
+    @Operation(
+            summary = "장바구니 라인 벌크 세팅",
+            description = "여러 라인을 한 번에 추가/수정/삭제합니다. 같은 productId에 대해 route별로 동시 처리 가능합니다."
+    )
+    public ResponseEntity<List<CartLineResponse>> bulkSet(
+            @Valid @RequestBody CartBulkSetRequest req,
+            @AuthenticationPrincipal PrincipalDetails principal
+    ) {
+        Long userId = principal.getUser().getId();
+        return ResponseEntity.ok(cartService.bulkSet(userId, req));
+    }
+
+    @DeleteMapping("/lines/{productId}")
+    @Operation(
+            summary = "장바구니 라인 삭제",
+            description = "특정 상품/구매경로(route)의 라인을 삭제합니다."
+    )
+    public ResponseEntity<Void> removeLine(
+            @PathVariable Long productId,
+            @RequestParam PurchaseRoute route,
+            @AuthenticationPrincipal PrincipalDetails principal
+    ) {
+        Long userId = principal.getUser().getId();
+        cartService.remove(userId, productId, route);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping
     @Operation(
             summary = "장바구니 비우기",
-            description = "사용자의 장바구니를 비웁니다."
+            description = "사용자의 장바구니를 전체 삭제합니다."
     )
     public ResponseEntity<Void> clear(
             @AuthenticationPrincipal PrincipalDetails principal

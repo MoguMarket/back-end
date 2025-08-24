@@ -2,9 +2,11 @@ package com.lionkit.mogumarket.product.service;
 
 
 import com.lionkit.mogumarket.category.enums.CategoryType;
+import com.lionkit.mogumarket.global.base.response.exception.BusinessException;
+import com.lionkit.mogumarket.global.base.response.exception.ExceptionType;
 import com.lionkit.mogumarket.product.dto.request.ProductPatchRequest;
 import com.lionkit.mogumarket.product.dto.request.ProductSaveRequest;
-import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
+import com.lionkit.mogumarket.product.dto.ProductUpdateDto;
 import com.lionkit.mogumarket.product.dto.response.ProductResponse;
 import com.lionkit.mogumarket.product.entity.Product;
 import com.lionkit.mogumarket.product.repository.ProductRepository;
@@ -19,7 +21,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class ProductService {
+public class ProductWriteService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
 
@@ -27,7 +29,8 @@ public class ProductService {
     @Transactional
     public Long saveProduct(ProductSaveRequest request) {
         Store store = storeRepository.findById(request.getStoreId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Store ID"));
+                .orElseThrow(() -> new BusinessException(ExceptionType.STORE_NOT_FOUND));
+
 
         Product product = Product.builder()
                 .name(request.getName())
@@ -48,7 +51,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductResponse getProductResponse(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() ->new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
         return ProductResponse.fromEntity(product);
     }
 
@@ -72,30 +75,17 @@ public class ProductService {
 
     // UPDATE: 전체 수정
     @Transactional
-    public void updateProduct(Long id, ProductUpdateRequest request) {
+    public void updateProduct(Long id, ProductUpdateDto dto) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
-
-        product.update(
-                request.getName(),
-                request.getDescription(),
-                request.getUnit(),
-                request.getOriginalPrice(),
-                request.getStock(),
-                request.getImageUrl(),
-                request.getStoreId() != null ?
-                        storeRepository.findById(request.getStoreId())
-                                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Store ID"))
-                        : null,
-                request.getCategory()
-        );
+                .orElseThrow(() ->new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
+        product.update(dto);
     }
 
     // PATCH: 부분 수정
     @Transactional
     public void patchProduct(Long id, ProductPatchRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() ->new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
 
         product.patch(
                 request.getOriginalPrice(),
@@ -107,33 +97,9 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() ->new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
         productRepository.delete(product);
     }
 
-
-    public Page<ProductResponse> listByCategory(CategoryType category, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return productRepository
-                .findByCategoryOrderByCreatedAtDesc(category, pageable)
-                .map(ProductResponse::fromEntity);
-    }
-
-    // (선택) 다중 카테고리
-    public Page<ProductResponse> listByCategories(List<CategoryType> categories, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return productRepository
-                .findByCategoryInOrderByCreatedAtDesc(categories, pageable)
-                .map(ProductResponse::fromEntity);
-    }
-
-    public Page<ProductResponse> listByPrice(Double min, Double max, int page, int size) {
-        double lo = (min == null) ? 0 : min;
-        double hi = (max == null) ? Double.MAX_VALUE : max;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return productRepository
-                .findByOriginalPricePerBaseUnitBetweenOrderByCreatedAtDesc(lo, hi, pageable)
-                .map(ProductResponse::fromEntity);
-    }
 
 }

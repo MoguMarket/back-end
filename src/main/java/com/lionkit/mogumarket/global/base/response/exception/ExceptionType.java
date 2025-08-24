@@ -33,6 +33,9 @@ public enum ExceptionType {
     UNAUTHORIZED_USER(UNAUTHORIZED, "U005","로그인 되지 않은 사용자"),
 
 
+    //cart
+    INVALID_QTYBASE(NOT_ACCEPTABLE , "C001","카트 적재 수량은 1 이상이어야 합니다."),
+    CART_NOT_FOUND(NOT_FOUND, "C002", "유저의 카트가 존재하지 않습니다"),
 
     //point
     POINT_WALLET_NOT_FOUND(NOT_FOUND, "P001", "해당 사용자에 대한 point wallet 을 찾을 수 없습니다."),
@@ -53,6 +56,16 @@ public enum ExceptionType {
      */
     POINT_BALANCE_INSUFFICIENT(NOT_ACCEPTABLE,"P004","보유중인 포인트가 부족합니다."),
 
+
+    //group buy
+    GROUP_BUY_NOT_FOUND(BAD_REQUEST,"G001","존재하지 않는 공동구매."),
+    GROUP_BUY_NOT_OPEN(BAD_REQUEST,"G002","진행중이지 않은 공동구매."),
+
+    //groupbuy stage
+    GROUP_BUY_STAGE_NOT_FOUND(BAD_REQUEST,"GS001","존재하지 않는 공동구매 단계"),
+
+    //orderline
+    ORDER_LINE_NOT_FOUND(BAD_REQUEST,"O001","존재하지 않는 order line(상품 주문)"),
 
     //store
     STORE_NOT_FOUND(NOT_FOUND, "S001", "존재하지 않는 가게"),

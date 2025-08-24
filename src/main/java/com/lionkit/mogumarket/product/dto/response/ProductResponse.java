@@ -6,6 +6,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * product 엔티티 자체에 대한 정보 reseponse
+ */
 @Getter
 @Builder
 @AllArgsConstructor

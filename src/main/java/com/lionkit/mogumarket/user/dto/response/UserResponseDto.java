@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @Builder
-public class SignUpResponseDto {
+public class UserResponseDto {
     private Long id;
     private String username;
 
@@ -18,11 +18,18 @@ public class SignUpResponseDto {
      */
     private Long pointWalletId;
 
-    public static SignUpResponseDto fromEntity(User user, Long pointWalletId ) {
-        return SignUpResponseDto.builder()
+    /**
+     * 유저의 회원가입과 함께 생성된
+     * cart 의 id 를 반환합니다.
+     */
+    private Long cartId;
+
+    public static UserResponseDto fromEntity(User user, Long pointWalletId , Long cartId) {
+        return UserResponseDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .pointWalletId(pointWalletId)
+                .cartId(cartId)
                 .build();
     }
 }

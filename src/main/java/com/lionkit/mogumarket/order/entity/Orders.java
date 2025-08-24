@@ -42,9 +42,21 @@ public class Orders extends BaseEntity {
     /**
      * 주문은 삭제 대신 상태전환을 사용하므로 cascade/remove 금지.
      * (DB FK도 ON DELETE RESTRICT/NO ACTION 유지 )
+     * 저장 편의만 위해 PERSIST 전파만 사용.
      */
     @Builder.Default
-    @OneToMany(mappedBy = "orders")
+    @OneToMany(mappedBy = "orders", cascade = CascadeType.PERSIST)
     private List<OrderLine> lines = new ArrayList<>();
+
+
+    public void addLine(OrderLine line) {
+        /**
+         * 부모에 cascade = PERSIST가 있으니
+         *  orderRepository.save(orders)로 라인까지 함께 INSERT 됩니다.
+         * @param line
+         */
+        line.updateOrders(this); // FK 주인 쪽 설정
+        this.lines.add(line);  // 자신(orders) 쪽 컬렉션 동기화
+    }
 
 }

@@ -1,6 +1,6 @@
 package com.lionkit.mogumarket.groupbuy.dto.response;
 
-import com.lionkit.mogumarket.groupbuy.domain.GroupBuyStatus;
+import com.lionkit.mogumarket.groupbuy.enums.GroupBuyStatus;
 import lombok.Builder;
 import lombok.Getter;
 

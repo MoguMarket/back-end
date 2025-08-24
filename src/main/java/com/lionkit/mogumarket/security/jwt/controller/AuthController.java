@@ -95,16 +95,5 @@ public class AuthController {
         return ResponseEntity.ok(ResponseUtil.createSuccessResponse());
     }
 
-    @GetMapping("/me")
-    public Map<String, Object> me(@AuthenticationPrincipal PrincipalDetails principal) {
-        Map<String, Object> res = new java.util.HashMap<>();
-        res.put("principalNull", principal == null);
-        if (principal != null) {
-            res.put("userId", principal.getUser().getId());
-            res.put("role", principal.getUser().getRole());
-            res.put("username", principal.getUser().getUsername());
-            res.put("nickname", principal.getUser().getNickname());
-        }
-        return res;
-    }
+
 }

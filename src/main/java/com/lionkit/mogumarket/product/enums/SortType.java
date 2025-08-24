@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 @Getter
 @AllArgsConstructor
 public enum SortType {
+    AI("ai", Sort.Direction.DESC),     // ai 추천순
     DISCOUNT("discount", Sort.Direction.DESC),     // 할인율순
     DEADLINE("deadline", Sort.Direction.ASC),      // 종료 임박순
     SALES("sales", Sort.Direction.DESC),           // 판매순

@@ -1,6 +1,7 @@
 package com.lionkit.mogumarket.order.entity;
 
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
+import com.lionkit.mogumarket.groupbuy.domain.GroupBuy;
 import com.lionkit.mogumarket.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -53,5 +54,25 @@ public class OrderLine extends BaseEntity {
      */
     private int finalLevelSnapshot;               // 예: 1, 2, 3 ...
     private double finalDiscountPercentSnapshot;  // 예: 15
-    private double finalUnitPriceSnapshot;        // 기준단위당 적용 단가
+    private double finalUnitPriceSnapshot;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_buy_id") // nullable=true: 일반 주문은 null
+    private GroupBuy groupBuy;
+
+
+    /** 편의 메서드 */
+    // updateOrders 만 실수로 하고 (OrderLine 의) addLine 을 하지 않는 것을 방지하는 차원에서 외부 패키지에서 접근 못하도록 protected 설정
+    protected void updateOrders(Orders orders) {
+        this.orders = orders;
+    }
+
+
+    public void finalizeSnapshots(int level, double discount, double unitPrice) {
+        this.finalLevelSnapshot = level;
+        this.finalDiscountPercentSnapshot = discount;
+        this.finalUnitPriceSnapshot = unitPrice;
+    }
+
+
 }

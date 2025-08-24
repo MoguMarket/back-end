@@ -1,7 +1,6 @@
 package com.lionkit.mogumarket.cart.entity;
 
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
-import com.lionkit.mogumarket.product.entity.Product;
 import com.lionkit.mogumarket.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,24 +23,24 @@ public class Cart extends BaseEntity  {
     @Column(name = "cart_id")
     private Long id;
 
-    private Integer quantity;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
 
-    public void increase(int amount) {
-        this.quantity += amount;
-    }
 
-    public void changeQuantity(int quantity) {
-        if (quantity < 1) throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
-        this.quantity = quantity;
+    /** CartLine 은 cart–product의 중간테이블(라인 엔티티) */
+    @Builder.Default
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartLine> lines = new ArrayList<>();
+
+
+
+    public void addLine(CartLine line) {
+        line.updateCart(this);
+        this.lines.add(line);
     }
 }
 

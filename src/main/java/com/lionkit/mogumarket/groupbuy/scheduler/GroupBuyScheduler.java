@@ -1,7 +1,7 @@
 package com.lionkit.mogumarket.groupbuy.scheduler;
 
 import com.lionkit.mogumarket.groupbuy.domain.GroupBuy;
-import com.lionkit.mogumarket.groupbuy.domain.GroupBuyStatus;
+import com.lionkit.mogumarket.groupbuy.enums.GroupBuyStatus;
 import com.lionkit.mogumarket.groupbuy.repository.GroupBuyRepository;
 import com.lionkit.mogumarket.groupbuy.service.GroupBuyService;
 import lombok.RequiredArgsConstructor;

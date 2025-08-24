@@ -16,7 +16,7 @@ public enum Unit {
     private final String key;
     private final String title;
     /** 기준단위로의 환산 계수 (예: KG -> 1000(g)) */
-    private final Double toBase;
+    private final double toBase;
 
     public boolean isWeight() { return this == G || this == KG; }
     public boolean isVolume() { return this == ML || this == L; }

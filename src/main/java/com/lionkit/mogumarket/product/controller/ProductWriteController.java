@@ -1,11 +1,8 @@
 package com.lionkit.mogumarket.product.controller;
-import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.product.dto.request.ProductSaveRequest;
-import com.lionkit.mogumarket.product.dto.request.ProductUpdateRequest;
-import com.lionkit.mogumarket.product.dto.response.ProductGroupBuyOverviewResponse;
+import com.lionkit.mogumarket.product.dto.ProductUpdateDto;
 import com.lionkit.mogumarket.product.dto.response.ProductResponse;
-import com.lionkit.mogumarket.product.service.ProductQueryService;
-import com.lionkit.mogumarket.product.service.ProductService;
+import com.lionkit.mogumarket.product.service.ProductWriteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -21,16 +18,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/products", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Products", description = "상품 CRUD 및 조회 API")
-public class ProductController {
+public class ProductWriteController {
 
-    private final ProductService productService;
-    private final ProductQueryService productQueryService;
+    private final ProductWriteService productWriteService;
 
 
     // 상품 등록
@@ -72,7 +66,7 @@ public class ProductController {
             @RequestBody ProductSaveRequest request
     ) {
 
-        Long productId = productService.saveProduct(request);
+        Long productId = productWriteService.saveProduct(request);
         return ResponseEntity.status(201).body(productId);
     }
 
@@ -92,7 +86,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "상품 없음")
     })
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductResponse(id));
+        return ResponseEntity.ok(productWriteService.getProductResponse(id));
     }
 
     // 목록 조회 (페이징)
@@ -112,11 +106,9 @@ public class ProductController {
     })
     public ResponseEntity<Page<ProductResponse>> listProducts(
             @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            @Parameter(name= "marketId", description = "마켓 ID", example = "1")
-            @RequestParam(required = false) Long marketId
+            @RequestParam(defaultValue = "10") Integer size
     ) {
-        return ResponseEntity.ok(productService.list(page, size,marketId));
+        return ResponseEntity.ok(productWriteService.list(page, size));
     }
 
     // 상품 전체 수정
@@ -140,7 +132,7 @@ public class ProductController {
                     description = "상품 수정 요청 바디(부분 수정 허용)",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ProductUpdateRequest.class),
+                            schema = @Schema(implementation = ProductUpdateDto.class),
                             examples = @ExampleObject(name = "예시",
                                     value = """
                                             {
@@ -155,9 +147,9 @@ public class ProductController {
                                             """)
                     )
             )
-            @RequestBody ProductUpdateRequest request
+            @RequestBody ProductUpdateDto request
     ) {
-        productService.updateProduct(id, request);
+        productWriteService.updateProduct(id, request);
         return ResponseEntity.noContent().build();
     }
 
@@ -176,68 +168,8 @@ public class ProductController {
     })
 
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+        productWriteService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
-    @GetMapping("/{productId}/overview")
-    @Operation(
-            summary = "상품 + 공구 현황 조회",
-            description = "특정 상품의 정보와 현재 진행 중인 공구 상태(단계별 할인, 목표 달성 현황)를 함께 반환합니다."
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "성공적으로 상품 + 공구 정보 반환",
-            content = @Content(schema = @Schema(implementation = ProductGroupBuyOverviewResponse.class))
-    )
-    public ResponseEntity<ProductGroupBuyOverviewResponse> getOverview(
-            @Parameter(description = "조회할 상품 ID", required = true, example = "101")
-            @PathVariable Long productId
-    ) {
-        return ResponseEntity.ok(productQueryService.getOverview(productId));
-    }
-@GetMapping("/category/{category}")
-    @Operation(summary = "카테고리별 상품 목록")
-    public ResponseEntity<Page<ProductResponse>> listByCategoryPath(
-            @PathVariable CategoryType category,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
-    ) {
-        return ResponseEntity.ok(productService.listByCategory(category, page, size));
-    }
 
-    @GetMapping("/by-categories")
-    @Operation(summary = "여러 카테고리 상품 목록")
-    public ResponseEntity<Page<ProductResponse>> listByCategories(
-            @RequestParam List<CategoryType> categories,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
-    ) {
-        return ResponseEntity.ok(productService.listByCategories(categories, page, size));
-    }
-
-    // 가격 범위 필터 조회
-    @GetMapping("/price")
-    @Operation(
-            summary = "가격 범위로 상품 조회",
-            description = "최소/최대 가격으로 상품을 필터링해 페이지네이션으로 반환합니다. " +
-                    "minPrice 또는 maxPrice가 비어있으면 해당 경계는 제한하지 않습니다."
-    )
-    @Parameters({
-            @Parameter(name = "minPrice", description = "최소 가격(포함)", example = "1000"),
-            @Parameter(name = "maxPrice", description = "최대 가격(포함)", example = "5000"),
-            @Parameter(name = "page",     description = "페이지(0-base)", example = "0"),
-            @Parameter(name = "size",     description = "페이지 크기", example = "10")
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = org.springframework.data.domain.Page.class)))
-    })
-    public ResponseEntity<Page<ProductResponse>> listByPrice(
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
-    ) {
-        return ResponseEntity.ok(productService.listByPrice(minPrice, maxPrice, page, size));
-    }
 }

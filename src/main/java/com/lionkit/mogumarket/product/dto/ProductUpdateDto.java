@@ -1,22 +1,20 @@
-package com.lionkit.mogumarket.product.dto.request;
+package com.lionkit.mogumarket.product.dto;
 
 
 import com.lionkit.mogumarket.category.enums.CategoryType;
 import com.lionkit.mogumarket.product.enums.Unit;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDateTime;
+import lombok.*;
 
 @Getter @Setter
-public class ProductUpdateRequest {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ProductUpdateDto {
     private String name;
     private String description;
     private Unit unit;
-    private Double originalPrice; // null이면 변경 안함
+    private Double originalPricePerBaseUnit; // null이면 변경 안함
     private Double stock;         // 총 재고 변경 시
     private String imageUrl;
-    private LocalDateTime deadline;
-    private Long storeId;         // 소속 스토어 변경 시
     private CategoryType category;
 }
