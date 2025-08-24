@@ -56,8 +56,7 @@ public class PaymentService {
     public CreatePaymentResult createPaymentReady(
             Long ordersId,
             long paidCashAmount,
-            long paidPointAmount,
-            CurrencyCode currency
+            long paidPointAmount
     ) {
         Orders orders = orderRepository.findById(ordersId)
                 .orElseThrow(() -> new BusinessException(ExceptionType.ORDER_NOT_FOUND));
@@ -77,7 +76,7 @@ public class PaymentService {
                 .amount(total)
                 .refundType(null)
                 .totalRefundAmount(0L)
-                .currency(Objects.requireNonNull(currency))
+                .currency(Objects.requireNonNull(CurrencyCode.KRW))
                 .orders(orders)
                 .build();
 
@@ -93,7 +92,7 @@ public class PaymentService {
             orders.updateStatus(OrderStatus.CONFIRMED);
         }
 
-        return new CreatePaymentResult(payment.getId(), merchantUid, total, currency);
+        return new CreatePaymentResult(payment.getId(), merchantUid, total, CurrencyCode.KRW);
     }
 
     private static String genMerchantUid(Long ordersId) {

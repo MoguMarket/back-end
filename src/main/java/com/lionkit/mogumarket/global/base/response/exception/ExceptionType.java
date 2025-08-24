@@ -63,7 +63,7 @@ public enum ExceptionType {
 
     //groupbuy stage
     GROUP_BUY_STAGE_NOT_FOUND(BAD_REQUEST,"GS001","존재하지 않는 공동구매 단계"),
-
+    GROUPBUY_ALREADY_OPEN(BAD_REQUEST,"GS002","해당 상품에 대한 공동구매가 이미 개설되어있습니다"),
     //order
     ORDER_NOT_FOUND(BAD_REQUEST,"O001","존재하지 않는 order(주문건)"),
     INVALID_ORDER_STATUS(NOT_ACCEPTABLE,"O002","유효하지 않은 order status"),

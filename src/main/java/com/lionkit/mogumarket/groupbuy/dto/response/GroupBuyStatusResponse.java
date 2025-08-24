@@ -1,29 +1,33 @@
 package com.lionkit.mogumarket.groupbuy.dto.response;
 
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lionkit.mogumarket.groupbuy.enums.GroupBuyStatus;
 import lombok.Builder;
-import lombok.Getter;
 
-import java.time.LocalDateTime;
-
-@Getter
 @Builder
-public class GroupBuyStatusResponse {
-    private Long groupBuyId;
-    private GroupBuyStatus status;
-    private int stageCount;
+public record GroupBuyStatusResponse(
+        Long groupBuyId,
+        GroupBuyStatus status,
 
+        // 누적/목표
+        double totalQuantity,
+        double targetQuantity,
 
-    private double totalQuantity;         // 누적 참여 수량
-    private double targetQuantity;
-    // 목표 수량
-    private double currentDiscount;       // 현재 할인율(%)
-    private double remainingToNextStage;  // 다음 단계까지 남은 수량 (0이면 최상단계 or 단계없음)
+        // 현재/다음 단계 정보
+        Integer currentStageLevel,      // 없으면 null
+        Double currentStageStartQty,    // 없으면 null
+        Double currentDiscount,         // %
+        Long appliedUnitPrice,          // 현재 적용 단가(스냅샷 기준)
 
-    private double originalUnitPrice;      // 상품 기준단위 원가
-    private long appliedUnitPrice;         // 현재 단계 할인 반영 단가(원, 반올림)
+        Integer nextStageLevel,         // 없으면 null
+        Double nextStageStartQty,       // 없으면 null
+        Double remainingToNextStage,    // 다음 단게까지 남은 수량, 없으면 0
 
-    private LocalDateTime endAt; // 마감 시간
+        // 원가/최대 할인 등 참고 값
+        double originalUnitPrice,       // basePricePerBaseUnitSnapshot
+        double maxDiscountPercent,
 
-
-}
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        java.time.LocalDateTime lastUpdatedAt // 필요 시 버전/업데이트 표기
+) {}

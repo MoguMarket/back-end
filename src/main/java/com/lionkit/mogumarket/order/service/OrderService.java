@@ -7,6 +7,9 @@ import com.lionkit.mogumarket.groupbuy.domain.GroupBuyStage;
 import com.lionkit.mogumarket.groupbuy.enums.GroupBuyStatus;
 import com.lionkit.mogumarket.groupbuy.repository.GroupBuyRepository;
 import com.lionkit.mogumarket.groupbuy.repository.GroupBuyStageRepository;
+import com.lionkit.mogumarket.order.dto.request.CreateOrderLineRequest;
+import com.lionkit.mogumarket.order.dto.response.OrderLineResponse;
+import com.lionkit.mogumarket.order.dto.response.OrderSnapshotResponse;
 import com.lionkit.mogumarket.order.entity.OrderLine;
 import com.lionkit.mogumarket.order.entity.Orders;
 import com.lionkit.mogumarket.order.enums.OrderStatus;
@@ -123,41 +126,120 @@ public class OrderService {
 
     /**
      * 단일 상품 주문 확정
-     * @param participateInGroupBuy true=공구참여, false=미참여(즉시구매)
      */
-    public Long confirmSingleProductOrder(Long userId, Long productId, double qtyBase, boolean participateInGroupBuy){
-        if (qtyBase <= 0) throw new BusinessException(ExceptionType.INVALID_QTYBASE);
+    public Long confirmSingleProductOrder(Long userId , CreateOrderLineRequest req){
+
+            Long productId = req.productId();
+            double qtyBase = req.qtyBase();
+            boolean participateInGroupBuy= req.participateInGroupBuy();
+
+        return confirmMultiProductOrder(
+                userId,
+                java.util.List.of(new CreateOrderLineRequest(productId, qtyBase, participateInGroupBuy))
+        );
+
+    }
+
+
+    @Transactional
+    public Long confirmMultiProductOrder(Long userId, List<CreateOrderLineRequest> commands) {
+        if (commands == null || commands.isEmpty()) {
+            throw new BusinessException(ExceptionType.INVALID_QTYBASE); // 프로젝트에 맞는 BAD_REQUEST성 코드가 있으면 교체 권장
+        }
+        // 수량 유효성(>0) 1차 검증
+        for (CreateOrderLineRequest c : commands) {
+            if (c.qtyBase() <= 0) throw new BusinessException(ExceptionType.INVALID_QTYBASE);
+        }
 
         try {
-
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new BusinessException(ExceptionType.USER_NOT_FOUND));
 
-            // 1) 상품 비관적 락 ( 항상 Product 먼저 잠금 )
-            Product product = productRepository.findForUpdate(productId)
-                    .orElseThrow(() -> new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
-
-            // 공구는 상품 1:1 이므로 필요시 조회
-            GroupBuy openGb = groupBuyRepository
-                    .findTopByProductAndStatusOrderByCreatedAtDesc(product, GroupBuyStatus.OPEN)
-                    .orElse(null);
-
+            // 교착 회피: productId 기준 정렬
+            List<CreateOrderLineRequest> sorted = commands.stream()
+                    .sorted(java.util.Comparator.comparing(CreateOrderLineRequest::productId))
+                    .toList();
 
             Orders orders = Orders.builder()
                     .user(user)
                     .status(OrderStatus.CONFIRMED)
                     .build();
 
-            // 공구에 참여하기 == true 인경우
-            if (participateInGroupBuy) {
-                if (openGb == null) throw new BusinessException(ExceptionType.GROUP_BUY_NOT_FOUND);
-                else return placeGroupBuyOrder(orders, openGb, product, qtyBase);
+            for (CreateOrderLineRequest cmd : sorted) {
+                // 1) Product 비관락
+                Product product = productRepository.findForUpdate(cmd.productId())
+                        .orElseThrow(() -> new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
+
+                if (cmd.participateInGroupBuy()) {
+                    // 2) 공구 열려있는지 조회
+                    GroupBuy openGb = groupBuyRepository
+                            .findTopByProductAndStatusOrderByCreatedAtDesc(product, GroupBuyStatus.OPEN)
+                            .orElseThrow(() -> new BusinessException(ExceptionType.GROUP_BUY_NOT_FOUND));
+
+                    // 3) GroupBuy 비관락 (항상 Product 다음에)
+                    GroupBuy gbLocked = groupBuyRepository.findByIdForUpdate(openGb.getId())
+                            .orElseThrow(() -> new BusinessException(ExceptionType.GROUP_BUY_NOT_FOUND));
+                    if (gbLocked.getStatus() != GroupBuyStatus.OPEN) {
+                        throw new BusinessException(ExceptionType.GROUP_BUY_NOT_OPEN);
+                    }
+
+                    // 4) 재고/공구 한도 체크
+                    double remainStock = product.getStock() - product.getCurrentBaseQty();
+                    if (cmd.qtyBase() > remainStock) throw new BusinessException(ExceptionType.STOCK_OVERFLOW);
+
+                    double remainGroup = gbLocked.getTargetQty() - gbLocked.getCurrentQty();
+                    if (cmd.qtyBase() > remainGroup) throw new BusinessException(ExceptionType.STOCK_OVERFLOW);
+
+                    // 5) 현재 단계 조회(참여 직전 누적 기준)
+                    double totalQtyBeforeJoin = gbLocked.getCurrentQty();
+                    GroupBuyStage curStage = groupBuyStageRepository
+                            .findTopByGroupBuyAndStartQtyLessThanEqualOrderByStartQtyDesc(gbLocked, totalQtyBeforeJoin)
+                            .orElseThrow(() -> new BusinessException(ExceptionType.GROUP_BUY_STAGE_NOT_FOUND));
+
+                    int level = curStage.getLevel();
+                    double discount = curStage.getDiscountPercent();
+                    double appliedUnitPrice = curStage.getAppliedUnitPrice();
+
+                    // 6) 누적 반영
+                    product.increaseCurrentBaseQty(cmd.qtyBase());
+                    gbLocked.increaseQty(cmd.qtyBase());
+
+                    // 7) 라인 생성
+                    OrderLine line = OrderLine.builder()
+                            .orders(orders)
+                            .product(product)
+                            .groupBuy(gbLocked)
+                            .orderedBaseQty(cmd.qtyBase())
+                            .levelSnapshot(level)
+                            .discountPercentSnapshot(discount)
+                            .unitPriceSnapshot(appliedUnitPrice)
+                            .build();
+
+                    orders.addLine(line); // FK/컬렉션 동기화
+                } else {
+                    // 일반 구매 경로
+                    double remainStock = product.getStock() - product.getCurrentBaseQty();
+                    if (cmd.qtyBase() > remainStock) throw new BusinessException(ExceptionType.STOCK_OVERFLOW);
+
+                    product.increaseCurrentBaseQty(cmd.qtyBase());
+
+                    double unitPrice = Math.round(product.getOriginalPricePerBaseUnit());
+
+                    OrderLine line = OrderLine.builder()
+                            .orders(orders)
+                            .product(product)
+                            .orderedBaseQty(cmd.qtyBase())
+                            .levelSnapshot(0)
+                            .discountPercentSnapshot(0.0)
+                            .unitPriceSnapshot(unitPrice)
+                            .build();
+
+                    orders.addLine(line);
+                }
             }
 
-            // 공구에 참여하지 않고 개인 구매를 하는 경우
-            else return placeNormalOrder(orders, product, openGb, qtyBase);
-
-
+            // 한 번만 저장(cascade=PERSIST)
+            return orderRepository.save(orders).getId();
 
         } catch (LockTimeoutException e) {
             throw new BusinessException(ExceptionType.PRODUCT_LOCK_TIMEOUT);
@@ -165,6 +247,8 @@ public class OrderService {
             throw new BusinessException(ExceptionType.PRODUCT_LOCK_CONFLICT);
         }
     }
+
+
 
     /**
      * 공구 종료 시 OrderLine의 final 스냅샷 채우기
@@ -227,6 +311,51 @@ public class OrderService {
     }
 
 
+    @Transactional(readOnly = true)
+    public OrderSnapshotResponse getOrderSnapshot(Long userId, Long ordersId) {
+        // 라인을 함께 로드
+        Orders orders = orderRepository.findById(ordersId)
+                .orElseThrow(() -> new BusinessException(ExceptionType.ORDER_NOT_FOUND));
 
+        if (!orders.getUser().getId().equals(userId)) {
+            throw new BusinessException(ExceptionType.ORDER_NOT_FOUND);
+        }
+        return OrderSnapshotResponse.from(orders);
+    }
 
+    @Transactional(readOnly = true)
+    public List<OrderSnapshotResponse> listMyOrders(Long userId) {
+        // 목록 조회 시에도 라인을 함께 로드
+        List<Orders> list = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        return list.stream()
+                .map(OrderSnapshotResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderLineResponse> listLinesByOrders(Long userId, Long ordersId) {
+        // 단건 조회와 동일하게 라인 포함 주문을 가져와도 무방
+        Orders orders = orderRepository.findById(ordersId)
+                .orElseThrow(() -> new BusinessException(ExceptionType.ORDER_NOT_FOUND));
+
+        if (!orders.getUser().getId().equals(userId)) {
+            throw new BusinessException(ExceptionType.ORDER_NOT_FOUND);
+        }
+        return orders.getLines().stream()
+                .map(OrderLineResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderLineResponse getOrderLineSnapshot(Long userId, Long orderLineId) {
+        OrderLine line = orderLineRepository.findByIdWithOrders(orderLineId)
+                .orElseThrow(() -> new BusinessException(ExceptionType.ORDER_LINE_NOT_FOUND));
+
+        if (!line.getOrders().getUser().getId().equals(userId)) {
+            throw new BusinessException(ExceptionType.ORDER_NOT_FOUND);
+        }
+        return OrderLineResponse.from(line);
+    }
 }
+
+

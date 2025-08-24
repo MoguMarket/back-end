@@ -32,8 +32,7 @@ public class PaymentController {
         var res = paymentService.createPaymentReady(
                 req.ordersId(),
                 req.paidCashAmount(),
-                req.paidPointAmount(),
-                req.currency()
+                req.paidPointAmount()
         );
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CreatePaymentResponse.from(res));

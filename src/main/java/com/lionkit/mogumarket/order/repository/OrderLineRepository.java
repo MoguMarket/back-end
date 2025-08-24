@@ -11,6 +11,15 @@ import java.util.Optional;
 
 public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
 
+    @Query("""
+           select ol
+           from OrderLine ol
+           join fetch ol.orders o
+           where ol.id = :orderLineId
+           """)
+    Optional<OrderLine> findByIdWithOrders(Long orderLineId);
+
+
     @Query("select distinct l.orders.user.id from OrderLine l where l.groupBuy = :gb")
     List<Long> findParticipantUserIds(@Param("gb") GroupBuy gb);
 

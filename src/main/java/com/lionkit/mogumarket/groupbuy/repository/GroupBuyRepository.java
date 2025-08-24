@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
+
+    boolean existsByProductIdAndStatus(Long productId, GroupBuyStatus status);
+
     List<GroupBuy> findByStatus(GroupBuyStatus status);
 
     // 마감 스케줄링용: endAt 이전인데 아직 OPEN

@@ -210,16 +210,16 @@ public class CartService {
      * - 공구 상품이면 현재 단계의 appliedUnitPrice 사용(스냅샷 기반)
      * - 일반 구매 상품이면 일반가(originalPricePerBaseUnit) 사용
      */
-    private long calcApplicableUnitPrice(CartLine line) {
+    private double calcApplicableUnitPrice(CartLine line) {
         Product p = line.getProduct();
 
         // NORMAL(즉시구매): 일반가
-        if (line.getRoute() == PurchaseRoute.NORMAL) return Math.round(p.getOriginalPricePerBaseUnit());
+        if (line.getRoute() == PurchaseRoute.NORMAL) return p.getOriginalPricePerBaseUnit();
 
 
         // GROUPBUY: 현재 스테이지 스냅샷 단가
         GroupBuy gb = p.getGroupBuy(); // 상품 1:1 공구 (생성시 필수 정책)
-        if (gb == null) return Math.round(p.getOriginalPricePerBaseUnit());             // 정책에선 없다고 보지 않지만, 방어 로직: 공구가 없다면 일반가로 폴백
+        if (gb == null) return p.getOriginalPricePerBaseUnit();             // 정책에선 없다고 보지 않지만, 방어 로직: 공구가 없다면 일반가로 폴백
 
 
 
@@ -231,7 +231,7 @@ public class CartService {
         if (cur != null) return cur.getAppliedUnitPrice();
 
         // 정책에선 없다고 보지 않지만, 방어 로직: 공구가 없다면 공구 원가로 폴백
-        return Math.round(gb.getBasePricePerBaseUnitSnapshot());
+        return gb.getBasePricePerBaseUnitSnapshot();
     }
 
     /** 단일 라인 제거 */

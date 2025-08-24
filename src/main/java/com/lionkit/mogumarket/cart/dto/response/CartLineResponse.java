@@ -2,6 +2,7 @@ package com.lionkit.mogumarket.cart.dto.response;
 
 
 import com.lionkit.mogumarket.cart.entity.CartLine;
+import com.lionkit.mogumarket.cart.enums.PurchaseRoute;
 import lombok.*;
 
 @Getter
@@ -15,6 +16,7 @@ public class CartLineResponse {
         double unitPrice;
         double quantity;
         double lineTotal; // = unitPrice * quantity
+        PurchaseRoute route;
 
 
         public static CartLineResponse of(CartLine line, double unitPrice) {
@@ -25,6 +27,7 @@ public class CartLineResponse {
                         .unitPrice(unitPrice)
                         .quantity(qty)
                         .lineTotal(unitPrice * qty)
+                        .route(line.getRoute())
                         .build();
         }
 

@@ -13,6 +13,8 @@ import lombok.Setter;
 public class UserResponseDto {
     private Long id;
     private String username;
+    private String nickname;
+    private String email;
 
     /**
      * 유저의 회원가입과 함께 생성된
@@ -30,6 +32,8 @@ public class UserResponseDto {
         return UserResponseDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
                 .pointWalletId(pointWalletId)
                 .cartId(cartId)
                 .build();
