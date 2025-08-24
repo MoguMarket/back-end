@@ -48,11 +48,9 @@ public class PortonePaymentHistoryDetail extends BaseEntity {
 
 
     /**
-     * 결제 (부분) 취소 event 발생시 포트원에서 발급되는 cancellationId 입니다.
-     * 결제 취소 관련 event 가 아닌 트랜젝션의 경우 nullable.
+     * 결제 (부분) 취소 event 발생시 포트원에서 발급되는 cancellationId 는 따로 저장하지 않기로 했습니다.
+     * (같은 취소 이벤트라도 취소ID 기반 히스토리와 트랜잭션ID 기반 히스토리가 동시에 쌓일 여지가 있기 떄문 )
      */
-    @Column(length = 100)
-    private String cancellationId;
 
     /**
      * 포트원에 기록된 결제 취소 사유

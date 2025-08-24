@@ -64,8 +64,13 @@ public enum ExceptionType {
     //groupbuy stage
     GROUP_BUY_STAGE_NOT_FOUND(BAD_REQUEST,"GS001","존재하지 않는 공동구매 단계"),
 
+    //order
+    ORDER_NOT_FOUND(BAD_REQUEST,"O001","존재하지 않는 order(주문건)"),
+    INVALID_ORDER_STATUS(NOT_ACCEPTABLE,"O002","유효하지 않은 order status"),
+    INVALID_ORDER_AMOUNT(NOT_ACCEPTABLE , "O003","유효하지 않은 order amount"),
+
     //orderline
-    ORDER_LINE_NOT_FOUND(BAD_REQUEST,"O001","존재하지 않는 order line(상품 주문)"),
+    ORDER_LINE_NOT_FOUND(BAD_REQUEST,"OL001","존재하지 않는 order line(상품 주문)"),
 
     //store
     STORE_NOT_FOUND(NOT_FOUND, "S001", "존재하지 않는 가게"),
@@ -76,8 +81,14 @@ public enum ExceptionType {
     INVALID_QTY(NOT_ACCEPTABLE,"P003","구매량은 양수여야 합니다"),
     PRODUCT_LOCK_TIMEOUT(LOCKED,"P004","구매에 대한 비관적 락 대기 초과, 재시도 바람."),
     PRODUCT_LOCK_CONFLICT(CONFLICT,"P005","구매에 대한 비관적 락 관련 오류"),
-    STAGE_NOT_DEFINED(BAD_REQUEST,"P006","상품의 단계가 설정되지 않음");
+    STAGE_NOT_DEFINED(BAD_REQUEST,"P006","상품의 단계가 설정되지 않음"),
 
+    //payment
+    PAYMENT_NOT_FOUND(NOT_FOUND, "P001", "존재하지 결재 정보"),
+    INVALID_AMOUNT(NOT_ACCEPTABLE, "P002", "유효하지 않은 금액"),
+
+    //REFUND
+    REFUND_EXCEEDS_AVAILABLE(NOT_ACCEPTABLE, "C001", "환불 가능액보다 더 큰 금액의 환불은 불가합니다.");
     private final HttpStatus status;
     private final String code;
     private final String message;}

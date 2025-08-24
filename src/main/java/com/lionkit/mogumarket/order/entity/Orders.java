@@ -59,4 +59,7 @@ public class Orders extends BaseEntity {
         this.lines.add(line);  // 자신(orders) 쪽 컬렉션 동기화
     }
 
+    public void updateStatus(OrderStatus status){
+        this.status=status;
+    }
 }

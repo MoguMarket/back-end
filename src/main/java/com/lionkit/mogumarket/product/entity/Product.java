@@ -119,4 +119,16 @@ public class Product extends BaseEntity {
         }
         this.currentBaseQty = next;
     }
+
+
+    /**
+     * 누적 수량 감소
+     */
+    public void decreaseCurrentBaseQty(double qtyBase) {
+        if (qtyBase <= 0) throw new BusinessException(ExceptionType.INVALID_QTY);
+        double next = this.currentBaseQty - qtyBase;
+        if (next < 0) throw new IllegalStateException("누적 수량 감소 불가(음수): 요청=" + qtyBase + ", 현재=" + this.currentBaseQty);
+        this.currentBaseQty = next;
+    }
+
 }

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+//TODO : 해당 유저가 참여중인 공구 정보도 추가
+
 @Setter
 @Getter
 @Builder

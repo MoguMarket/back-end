@@ -195,6 +195,37 @@ public class OrderService {
         // @Transactional -> Dirty Checking 반영됩니다.
     }
 
+    /**
+     * 결재 실패 시 rollback
+     * @param ordersId
+     */
+    @SuppressWarnings("unused")
+    public void rollbackStocks(Long ordersId) {
+        Orders orders = orderRepository.findById(ordersId)
+                .orElseThrow(() -> new BusinessException(ExceptionType.ORDER_NOT_FOUND));
+
+        // 이미 실패로 처리된 주문이면 멱등 처리
+        if (orders.getStatus() == OrderStatus.FAILED) return;
+
+        // 라인별로 제품/공구 되돌리기(락은 라인 단위로 보수적으로)
+        for (OrderLine line : orders.getLines()) {
+            // Product lock & rollback
+            Product pLocked = productRepository.findForUpdate(line.getProduct().getId())
+                    .orElseThrow(() -> new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
+            pLocked.decreaseCurrentBaseQty(line.getOrderedBaseQty());
+
+            // GroupBuy lock & rollback (참여 라인만)
+            GroupBuy gb = line.getGroupBuy();
+            if (gb != null) {
+                GroupBuy gbLocked = groupBuyRepository.findByIdForUpdate(gb.getId())
+                        .orElseThrow(() -> new BusinessException(ExceptionType.GROUP_BUY_NOT_FOUND));
+                gbLocked.decreaseQty(line.getOrderedBaseQty());
+            }
+        }
+
+        orders.updateStatus(OrderStatus.FAILED);
+    }
+
 
 
 

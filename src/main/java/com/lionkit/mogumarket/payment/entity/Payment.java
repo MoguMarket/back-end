@@ -49,11 +49,20 @@ public class Payment extends BaseEntity {
 
 
     /**
-     * provider 상의 식별자.
+     * provider 가 발급한, provider 상의 식별자.
      * 포인트로 전액 결제시 providerPaymentId 는 null 입니다.
      */
     @Column(length = 100)
     private String providerPaymentId;
+
+
+    /**
+     * 우리(가맹점. merchant) 측에서 발급한 식별자.
+     * orders-{id}-{uuid} 꼴.
+     */
+    @Column(nullable = false, unique = true, length = 64)
+    private String merchantUid;
+
 
 
     /**
@@ -103,7 +112,7 @@ public class Payment extends BaseEntity {
      */
     @Column
     @Builder.Default
-    private Long totalRefundAmount= 0L;
+    private long totalRefundAmount= 0L;
 
 
     /**

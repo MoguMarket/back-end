@@ -68,7 +68,7 @@ dependencies {
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
 
 	// portone
-	implementation group: 'io.portone', name: 'server-sdk', version: '0.19.2'
+	implementation 'io.portone:server-sdk:0.19.2'
 
 	//webclient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'

@@ -35,11 +35,14 @@ public class PaymentLine {
     /**
      * 환불 금액
      */
-    @Column(nullable = false)
+    @Column
     @Builder.Default
     private Long refundedAmount = 0L;
 
 
+    public void updateRefundedAmount(Long refundedAmount ){
+        this.refundedAmount = refundedAmount;
+    }
 
 
 

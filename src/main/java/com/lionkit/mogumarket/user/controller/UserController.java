@@ -38,7 +38,7 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponseDto me(@AuthenticationPrincipal PrincipalDetails principal) {
-        return res;
+        return userService.getUserInfoById(principal.getUser().getId());
     }
 
 
