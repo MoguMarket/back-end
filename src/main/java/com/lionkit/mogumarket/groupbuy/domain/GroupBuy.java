@@ -2,6 +2,7 @@ package com.lionkit.mogumarket.groupbuy.domain;
 
 import com.lionkit.mogumarket.global.base.domain.BaseEntity;
 import com.lionkit.mogumarket.product.entity.Product;
+import com.lionkit.mogumarket.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,6 +38,10 @@ public class GroupBuy extends BaseEntity {
 
     @Column(nullable = false)
     private double maxDiscountPercent;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
     @Builder.Default
     @OneToMany(mappedBy = "groupBuy", cascade = CascadeType.ALL, orphanRemoval = true)

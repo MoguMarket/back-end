@@ -35,6 +35,7 @@ public class GroupBuyController {
     @PostMapping("/{productId}")
     public ResponseEntity<Long> createGroupBuy(
             @Parameter(description = "상품 ID", required = true) @PathVariable Long productId,
+            @Parameter(description = "등록하는 상인(유저) ID", required = true) @RequestParam Long userId,
             @Parameter(description = "목표 수량", required = true) @RequestParam double targetQty,
             @Parameter(description = "최대 할인률(%)", required = false, example = "25")
             @RequestParam(required = false, defaultValue = "0") Double maxDiscountPercent,
@@ -50,7 +51,7 @@ public class GroupBuyController {
         LocalDateTime start = (startAt != null) ? LocalDateTime.parse(startAt) : LocalDateTime.now();
         LocalDateTime end = (endAt != null) ? LocalDateTime.parse(endAt) : LocalDateTime.now().plusDays(7);
 
-        return ResponseEntity.ok(groupBuyService.createGroupBuy(productId, targetQty, maxDiscountPercent, stage,start, end));
+        return ResponseEntity.ok(groupBuyService.createGroupBuy(productId,userId, targetQty, maxDiscountPercent, stage,start, end));
     }
 
     @Operation(summary = "공동구매 참여", description = "특정 공동구매에 유저가 수량을 참여합니다.")
@@ -106,5 +107,33 @@ public class GroupBuyController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         return ResponseEntity.ok(groupBuyQueryService.listClosingSoon(page, size));
+    }
+
+
+    @GetMapping("/creator/{userId}")
+    @Operation(
+            summary = "내가 만든 공구 목록",
+            description = "해당 유저가 생성한 공동구매 목록을 페이지 단위로 조회합니다.",
+            tags = {"GroupBuy"}
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProductGroupBuyOverviewResponse.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
+            @ApiResponse(responseCode = "404", description = "유저 또는 데이터 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    public ResponseEntity<Page<ProductGroupBuyOverviewResponse>> listByCreator(
+            @Parameter(description = "조회할 유저 ID", required = true, example = "1")
+            @PathVariable Long userId,
+
+            @Parameter(description = "페이지 번호(0부터 시작)", example = "0")
+            @RequestParam(defaultValue = "0") Integer page,
+
+            @Parameter(description = "페이지 크기", example = "10")
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        return ResponseEntity.ok(groupBuyQueryService.listByCreator(userId, page, size));
     }
 }

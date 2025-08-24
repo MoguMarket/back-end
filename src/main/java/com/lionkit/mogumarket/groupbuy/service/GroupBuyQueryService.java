@@ -78,4 +78,11 @@ public class GroupBuyQueryService {
                 .remainingToNextStage(remainingToNext)
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public Page<ProductGroupBuyOverviewResponse> listByCreator(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return groupBuyRepository.findByCreatedBy_Id(userId, pageable)
+                .map(this::toOverview);
+    }
 }

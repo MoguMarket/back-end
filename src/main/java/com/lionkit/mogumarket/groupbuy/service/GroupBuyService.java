@@ -1,10 +1,9 @@
-// com.lionkit.mogumarket.groupbuy.service.GroupBuyService
 package com.lionkit.mogumarket.groupbuy.service;
 
 import com.lionkit.mogumarket.groupbuy.domain.*;
 import com.lionkit.mogumarket.groupbuy.dto.response.GroupBuyStatusResponse;
 import com.lionkit.mogumarket.groupbuy.repository.*;
-import com.lionkit.mogumarket.notification.service.NotificationFacade; // ⬅️ 파사드 사용
+import com.lionkit.mogumarket.notification.service.NotificationFacade;
 import com.lionkit.mogumarket.product.entity.Product;
 import com.lionkit.mogumarket.product.repository.ProductRepository;
 import com.lionkit.mogumarket.user.entity.User;
@@ -27,35 +26,34 @@ public class GroupBuyService {
     private final GroupBuyStageRepository stageRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-
-    // ⬇️ FCMService 대신 파사드
     private final NotificationFacade notificationFacade;
 
-    /** 공동구매 생성 */
     @Transactional
-    public Long createGroupBuy(Long productId, double targetQty,
-                               double maxDiscountPercent, int stageCount, LocalDateTime startAt,LocalDateTime endAt) {
+    public Long createGroupBuy(Long productId, Long userId, double targetQty,
+                               double maxDiscountPercent, int stageCount, LocalDateTime startAt, LocalDateTime endAt) {
         if (targetQty <= 0) throw new IllegalArgumentException("targetQty must be > 0");
         if (maxDiscountPercent < 0 || maxDiscountPercent > 90) throw new IllegalArgumentException("maxDiscount out of range");
         if (stageCount < 1 || stageCount > 10) throw new IllegalArgumentException("stageCount out of range");
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품 없음"));
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
 
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
+                .createdBy(creator)
                 .targetQty(targetQty)
                 .currentQty(0)
                 .status(GroupBuyStatus.OPEN)
                 .maxDiscountPercent(maxDiscountPercent)
-                .startAt(startAt) // 시작 시간 추가
-                .endAt(endAt) // 마감 시간 추가
+                .startAt(startAt)
+                .endAt(endAt)
                 .build();
 
-        // 단계 자동 생성 (균등 분할 예시)
         for (int i = 1; i <= stageCount; i++) {
-            double startQty = Math.round((targetQty * i) / (stageCount + 1)); // 목표까지 균등히 배치
-            double discount = Math.round((maxDiscountPercent * i) / stageCount * 10) / 10.0; // 소수1자리
+            double startQty = Math.round((targetQty * i) / (stageCount + 1));
+            double discount = Math.round((maxDiscountPercent * i) / stageCount * 10) / 10.0;
             groupBuy.getStages().add(GroupBuyStage.builder()
                     .groupBuy(groupBuy)
                     .startQty(startQty)
@@ -65,7 +63,7 @@ public class GroupBuyService {
 
         return groupBuyRepository.save(groupBuy).getId();
     }
-    /** 공동구매 참여 */
+
     @Transactional
     public void participate(Long groupBuyId, Long userId, double qty) {
         if (qty <= 0) throw new IllegalArgumentException("qty must be > 0");
@@ -79,12 +77,10 @@ public class GroupBuyService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
 
-        // 재고 체크(상품 총재고 - 현재 누적)
         Product p = gb.getProduct();
         double remain = p.getStock() - gb.getCurrentQty();
         if (qty > remain) throw new IllegalStateException("재고 부족: 잔여 " + remain);
 
-        // 수량 반영 및 주문 기록
         gb.increaseQty(qty);
         GroupBuyOrder order = GroupBuyOrder.builder()
                 .groupBuy(gb)
@@ -93,7 +89,6 @@ public class GroupBuyService {
                 .build();
         orderRepository.save(order);
 
-        // 참여자 본인에게 알림
         notifyUserSafe(
                 user.getId(),
                 "공동구매 참여 완료",
@@ -101,7 +96,6 @@ public class GroupBuyService {
                 Map.of("event","GROUPBUY_JOINED","groupBuyId", String.valueOf(gb.getId()))
         );
 
-        // 목표 달성 시 전체 브로드캐스트
         if (gb.getStatus() == GroupBuyStatus.SUCCESS) {
             notifyAllParticipants(
                     gb,
@@ -112,7 +106,6 @@ public class GroupBuyService {
         }
     }
 
-    /** 공동구매 마감 */
     @Transactional
     public void closeGroupBuy(Long groupBuyId) {
         GroupBuy gb = groupBuyRepository.findById(groupBuyId)
@@ -127,7 +120,6 @@ public class GroupBuyService {
         );
     }
 
-    /** 공동구매 상태 + 단계별 할인 + 단가 계산 */
     @Transactional(readOnly = true)
     public GroupBuyStatusResponse getGroupBuyStatus(Long groupBuyId) {
         GroupBuy gb = groupBuyRepository.findById(groupBuyId)
@@ -138,7 +130,7 @@ public class GroupBuyService {
                 .sum();
 
         var stages = stageRepository.findByGroupBuyOrderByStartQtyAsc(gb);
-        int stageCount = stages.size(); // 단계 수 추가
+        int stageCount = stages.size();
 
         double currentDiscount = stages.stream()
                 .filter(s -> totalQty >= s.getStartQty())
@@ -164,18 +156,14 @@ public class GroupBuyService {
                 .remainingToNextStage(remainingToNext)
                 .originalUnitPrice(original)
                 .appliedUnitPrice(applied)
-                .stageCount(stageCount)  // 👈 단계 수 내려줌
+                .stageCount(stageCount)
                 .build();
     }
 
-    /* ───────────── 내부 알림 유틸 ───────────── */
-
     private void notifyUserSafe(Long userId, String title, String body, Map<String,String> data) {
         try {
-            notificationFacade.notifyUsers(List.of(userId), title, body, data); // 단일 유저도 List로 감싸기
-        } catch (Exception ignored) {
-            // 로깅만 하고 진행
-        }
+            notificationFacade.notifyUsers(List.of(userId), title, body, data);
+        } catch (Exception ignored) {}
     }
 
     private void notifyAllParticipants(GroupBuy gb, String title, String body, Map<String,String> data) {
@@ -185,8 +173,6 @@ public class GroupBuyService {
                 .toList();
         try {
             notificationFacade.notifyUsers(userIds, title, body, data);
-        } catch (Exception ignored) {
-            // 일부 실패는 파사드/FCM 레이어에서 정리
-        }
+        } catch (Exception ignored) {}
     }
 }
