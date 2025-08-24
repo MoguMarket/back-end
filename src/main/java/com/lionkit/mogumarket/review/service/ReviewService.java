@@ -12,8 +12,10 @@ import com.lionkit.mogumarket.user.entity.User;
 import com.lionkit.mogumarket.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +39,11 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         reviewRepository.findByUser_IdAndProduct_Id(user.getId(), product.getId())
-                .ifPresent(r -> { throw new IllegalStateException("이미 해당 상품에 대한 리뷰가 존재합니다."); });
-
+                .ifPresent(r -> {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "이미 해당 상품에 대한 리뷰가 존재합니다."
+                    );
+                });
         Review review = Review.builder()
                 .product(product)
                 .user(user)
