@@ -1,4 +1,4 @@
-package com.lionkit.mogumarket.global.config;
+package com.lionkit.mogumarket.s3.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

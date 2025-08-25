@@ -53,25 +53,25 @@ public class SecurityConfig {
                         // 프리플라이트는 모두 허용
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 공개 엔드포인트 (기존 것 유지 + 수정)
-                        .requestMatchers(
-                                "/api/auth/login",
-                                "/api/user/sign-up",
-                                "/admin/sync-products",       // ← 앞 슬래시 보정
-                                "/api/search",
-                                "/api/search/trending",
-                                "/api/auth/me"
-                        ).permitAll()
-
-                        // FCM: 공개는 vapid-key만, 나머지는 인증 필요
-                        .requestMatchers(HttpMethod.GET, "/api/fcm/web/vapid-key").permitAll()
-                        .requestMatchers("/api/fcm/**").authenticated()
-
-                        // 그 외는 기존 정책대로
-                        .requestMatchers(
-                                "/api/carts/**",
-                                "/api/user/complete-sign-up"
-                        ).authenticated()
+//                        // 공개 엔드포인트 (기존 것 유지 + 수정)
+//                        .requestMatchers(
+//                                "/api/auth/login",
+//                                "/api/user/sign-up",
+//                                "/admin/sync-products",       // ← 앞 슬래시 보정
+//                                "/api/search",
+//                                "/api/search/trending",
+//                                "/api/auth/me"
+//                        ).permitAll()
+//
+//                        // FCM: 공개는 vapid-key만, 나머지는 인증 필요
+//                        .requestMatchers(HttpMethod.GET, "/api/fcm/web/vapid-key").permitAll()
+//                        .requestMatchers("/api/fcm/**").authenticated()
+//
+//                        // 그 외는 기존 정책대로
+//                        .requestMatchers(
+//                                "/api/carts/**",
+//                                "/api/user/complete-sign-up"
+//                        ).authenticated()
 
                         .anyRequest().permitAll()
                 )

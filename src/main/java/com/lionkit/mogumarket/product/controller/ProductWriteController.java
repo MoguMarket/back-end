@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,45 +29,21 @@ public class ProductWriteController {
 
 
     // 상품 등록
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(
-            summary = "상품 등록",
-            description = "상품을 신규로 등록합니다."
-    )
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "상품 등록", description = "상품을 신규로 등록합니다. JSON 메타데이터와 이미지 파일을 multipart로 전송합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "생성 성공",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = Long.class),
-                            examples = @ExampleObject(name = "createdId", value = "101"))),
-            @ApiResponse(responseCode = "400", description = "요청 바디 유효성 오류"),
+                            schema = @Schema(implementation = Long.class))),
+            @ApiResponse(responseCode = "400", description = "요청 유효성 오류"),
             @ApiResponse(responseCode = "404", description = "가게(스토어) 미존재 등 참조 무결성 실패"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     public ResponseEntity<Long> createProduct(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    description = "상품 등록 요청 바디",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ProductSaveRequest.class),
-                            examples = @ExampleObject(name = "예시",
-                                    value = """
-                                            {
-                                              "storeId": 1,
-                                              "name": "제주 당근 5kg",
-                                              "description": "달달한 봄 당근",
-                                              "unit": "KG",
-                                              "originalPrice": 3200,
-                                              "stock": 500,
-                                              "imageUrl": "https://img.cdn/carrot.jpg"
-                                            }
-                                            """)
-                    )
-            )
-            @RequestBody ProductSaveRequest request
+            @RequestPart("request") ProductSaveRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-
-        Long productId = productWriteService.saveProduct(request);
+        Long productId = productWriteService.saveProduct(request, image);
         return ResponseEntity.status(201).body(productId);
     }
 
@@ -115,14 +92,8 @@ public class ProductWriteController {
     }
 
     // 상품 전체 수정
-    @PutMapping("/{id}")
-    @Operation(
-            summary = "상품 수정",
-            description = "상품의 상세 정보를 수정합니다. null인 필드는 수정하지 않습니다."
-    )
-    @Parameters({
-            @Parameter(name = "id", description = "상품 ID", required = true, example = "101")
-    })
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "상품 수정", description = "상품 상세를 수정합니다. JSON 메타데이터와 이미지 파일을 multipart로 전송합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "수정 성공"),
             @ApiResponse(responseCode = "404", description = "상품 없음"),
@@ -130,29 +101,10 @@ public class ProductWriteController {
     })
     public ResponseEntity<Void> updateProduct(
             @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    description = "상품 수정 요청 바디(부분 수정 허용)",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ProductUpdateDto.class),
-                            examples = @ExampleObject(name = "예시",
-                                    value = """
-                                            {
-                                              "name": "제주 당근 10kg",
-                                              "description": "더 달달한 여름 당근",
-                                              "unit": "KG",
-                                              "originalPrice": 3000,
-                                              "stock": 700,
-                                              "imageUrl": "https://img.cdn/carrot_v2.jpg",
-                                              "storeId": 1
-                                            }
-                                            """)
-                    )
-            )
-            @RequestBody ProductUpdateDto request
+            @RequestPart("request") ProductUpdateDto request,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        productWriteService.updateProduct(id, request);
+        productWriteService.updateProduct(id, request, image);
         return ResponseEntity.noContent().build();
     }
 
