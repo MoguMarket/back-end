@@ -106,9 +106,12 @@ public class ProductWriteController {
     })
     public ResponseEntity<Page<ProductResponse>> listProducts(
             @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) Long marketId
+
     ) {
-        return ResponseEntity.ok(productWriteService.list(page, size));
+
+        return ResponseEntity.ok(productWriteService.list(page, size,marketId));
     }
 
     // 상품 전체 수정

@@ -38,5 +38,4 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
 
 
     Page<GroupBuy> findByStatusAndEndAtAfter(GroupBuyStatus status, LocalDateTime now, Pageable pageable);
-    Page<GroupBuy> findByCreatedBy_Id(Long userId, Pageable pageable);
 }

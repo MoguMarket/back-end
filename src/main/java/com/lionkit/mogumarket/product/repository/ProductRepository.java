@@ -5,12 +5,9 @@ import com.lionkit.mogumarket.product.entity.Product;
 import io.lettuce.core.dynamic.annotation.Param;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +15,10 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
+    Page<Product> findByStoreId(Long storeId, Pageable pageable);
+
+
+    Page<Product> findByStore_Market_Id(Long marketId, Pageable pageable);
 
     List<Product> findByModifiedAtGreaterThan(LocalDateTime from);
 
@@ -47,6 +48,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByOriginalPricePerBaseUnitBetweenOrderByCreatedAtDesc(
             double min, double max, Pageable pageable
     );
+
+    @EntityGraph(attributePaths = {"store", "store.market"})
+    List<Product> findAllBy(); // ← select * from product 와 동일하게 동작
+    @Query("""
+      select p
+      from Product p
+      join fetch p.store s
+      join fetch s.market
+      where p.id = :id
+    """)
+    Optional<Product> findWithStoreAndMarketById(@org.springframework.data.repository.query.Param("id") Long id);
 
 
 }
