@@ -24,7 +24,7 @@ public class GroupBuy extends BaseEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false ,unique = true)
     private Product product;
 
     private LocalDateTime startAt;
