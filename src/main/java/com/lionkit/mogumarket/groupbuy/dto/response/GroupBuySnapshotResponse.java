@@ -46,7 +46,7 @@ public record GroupBuySnapshotResponse(
             int level,
             double startQty,
             double discountPercent,
-            long appliedUnitPrice
+            double appliedUnitPrice
     ) {
         public static GroupBuyStageSnapshotDto fromEntity(GroupBuyStage s) {
             return GroupBuyStageSnapshotDto.builder()

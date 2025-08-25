@@ -45,7 +45,7 @@ public record MyGroupBuyParticipationResponse(
             int level,
             double startQty,
             double discountPercent,
-            long appliedUnitPrice
+            double appliedUnitPrice
     ) {
         public static StageDto fromEntity(GroupBuyStage s) {
             return StageDto.builder()
