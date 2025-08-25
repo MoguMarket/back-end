@@ -195,7 +195,7 @@ public GroupBuySnapshotResponse getGroupBuyStatus(Long groupBuyId) {
             .orElse(null);
 
     double currentDiscount = (cur != null) ? cur.getDiscountPercent() : 0.0;
-    long appliedUnitPrice = (cur != null) ? cur.getAppliedUnitPrice()
+    double appliedUnitPrice = (cur != null) ? cur.getAppliedUnitPrice()
             : Math.round(gb.getBasePricePerBaseUnitSnapshot());
 
     double remainingToNext = (next != null) ? (next.getStartQty() - totalQty) : 0.0;

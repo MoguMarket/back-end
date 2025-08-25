@@ -36,6 +36,7 @@ public class ProductReadService {
 
 
 
+    @Transactional(readOnly = true)
     public ProductOverviewResponse getOverview(Long productId) {
         Product p = productRepository.findById(productId)
                 .orElseThrow(() -> new BusinessException(ExceptionType.PRODUCT_NOT_FOUND));
@@ -43,23 +44,26 @@ public class ProductReadService {
         GroupBuy gb = p.getGroupBuy();
         if (gb == null) throw new BusinessException(ExceptionType.GROUP_BUY_NOT_OPEN);
 
-        // 스테이지 목록(오름차순) + 현재/다음 스테이지 계산
-        var stages = stageRepository.findByGroupBuyOrderByStartQtyAsc(gb);
+        // 스테이지 목록(오름차순)
+        List<GroupBuyStage> stages = stageRepository.findByGroupBuyOrderByStartQtyAsc(gb);
         double curQty = gb.getCurrentQty();
 
-        GroupBuyStage curStage = stageRepository
-                .findTopByGroupBuyAndStartQtyLessThanEqualOrderByStartQtyDesc(gb, curQty)
-                .orElseThrow(()-> new BusinessException(ExceptionType.GROUP_BUY_STAGE_NOT_FOUND));
+        // 현재 스테이지: 없으면 베이스 스테이지(할인 0, 단가 = base snapshot)로 간주
+        var curOpt = stageRepository
+                .findTopByGroupBuyAndStartQtyLessThanEqualOrderByStartQtyDesc(gb, curQty);
 
+        double discountPercent = curOpt.map(GroupBuyStage::getDiscountPercent).orElse(0d);
+        double appliedUnitPrice = curOpt.map(GroupBuyStage::getAppliedUnitPrice)
+                .orElse(gb.getBasePricePerBaseUnitSnapshot());
+
+        // 다음 스테이지
         GroupBuyStage nextStage = stages.stream()
                 .filter(s -> curQty < s.getStartQty())
                 .findFirst()
                 .orElse(null);
-
         double remainingToNext = (nextStage == null) ? 0d : Math.max(0d, nextStage.getStartQty() - curQty);
-        double discountPercent = curStage.getDiscountPercent();
-        double appliedUnitPrice = curStage.getAppliedUnitPrice();
 
+        // 브리프 변환
         var stageBriefs = stages.stream()
                 .map(s -> new ProductOverviewResponse.StageBrief(
                         s.getLevel(),
@@ -69,19 +73,15 @@ public class ProductReadService {
                 ))
                 .toList();
 
-
-        double aloneBuyRemain = Math.max(0d, p.getStock() - p.getCurrentBaseQty()); // 일반 구매 가능 재고
-        double groupBuyRemain = Math.max(0d, gb.getTargetQty() - gb.getCurrentQty()); // 공구 가능 재고
-
-
-        double totalOrdered = p.getCurrentBaseQty();          // 일반+공구 누적
-        double groupOrdered = gb.getCurrentQty();             // 공구 누적
+        // 재고 및 진행률
+        double aloneBuyRemain = Math.max(0d, p.getStock() - p.getCurrentBaseQty());
+        double groupBuyRemain = Math.max(0d, gb.getTargetQty() - gb.getCurrentQty());
+        double totalOrdered = p.getCurrentBaseQty();
+        double groupOrdered = gb.getCurrentQty();
         double normalOrdered = Math.max(0d, totalOrdered - groupOrdered);
-
-        // Progress (목표 0 방어)
-        double progressPercent =
-                (gb.getTargetQty() > 0d) ? Math.min(100d, (groupOrdered / gb.getTargetQty()) * 100d) : 0d;
-
+        double progressPercent = (gb.getTargetQty() > 0d)
+                ? Math.min(100d, (groupOrdered / gb.getTargetQty()) * 100d)
+                : 0d;
 
         return ProductOverviewResponse.builder()
                 .basicInfo(ProductOverviewResponse.BasicInfo.builder()
@@ -96,7 +96,7 @@ public class ProductReadService {
                         .build())
                 .groupBuyInfo(ProductOverviewResponse.GroupBuyInfo.builder()
                         .groupBuyId(gb.getId())
-                        .stages(stageBriefs) // List<StageBrief>
+                        .stages(stageBriefs)
                         .build())
                 .priceInfo(ProductOverviewResponse.PriceInfo.builder()
                         .originalPricePerBaseUnit(p.getOriginalPricePerBaseUnit())

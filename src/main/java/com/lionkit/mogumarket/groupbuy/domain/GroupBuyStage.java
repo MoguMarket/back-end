@@ -34,7 +34,7 @@ public class GroupBuyStage extends BaseEntity {
 
     /** 해당 단계의 할인율 적용 가격 ( 공구 개설 이후 원가/할인율 수정 불가 )*/
     @Column(nullable = false)
-    private long appliedUnitPrice;
+    private double appliedUnitPrice;
 
     /**
      * appliedUnitPrice 를 구하는데 사용하는 util 메서드

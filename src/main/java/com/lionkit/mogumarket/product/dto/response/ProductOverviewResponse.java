@@ -120,6 +120,6 @@ public record ProductOverviewResponse(
             int level,               // 스테이지 레벨
             double startQty,         // 시작 수량
             double discountPercent,  // 해당 스테이지 할인율
-            long appliedUnitPrice    // 해당 스테이지 적용 단가
+            double appliedUnitPrice    // 해당 스테이지 적용 단가
     ) {}
 }
